@@ -20,10 +20,10 @@ class Player(entity.Entity):
       "fall": (resources["woodcutter_fall"], resources["woodcutter_fall_reverse"], 1)
     }
 
+    init_pos = (100, 367)
     active_attack_frames = [3, 4]
     self.attack_recovery = 400 # time it takes to recover after finishing attack
-    super().__init__(parent, resources, (100, 367), 100, 3, 4, 20, active_attack_frames)
-    self.update_center()
+    super().__init__(parent, resources, init_pos, 100, 3, 4, 20, active_attack_frames)
     
     self.healthbar = healthbar.Healthbar(self.parent, self, player=True)
 
@@ -31,8 +31,6 @@ class Player(entity.Entity):
     self.attack_sound = self.resources["axe1.mp3"]
     self.hurt_sound = resources["player_hurt.mp3"]
     self.death_sound = resources["game_over.mp3"]
-
-    self.floor = 367 # y position of floor
     
 
 
@@ -40,29 +38,6 @@ class Player(entity.Entity):
   def update(self, cur_time):
     super().update(cur_time)
 
-    self.update_center()
-    
-    if self.state == "dead":
-      self.handle_dying()
-    elif self.state == "hurt":
-      self.handle_hurt()
-    elif self.state == "attack":
-      self.handle_attack()
-    elif self.state == "jump":
-      self.handle_jump()
-    elif self.state == "fall":
-      self.handle_fall()
-      
-    # handle gravity
-    self.vel_y -= 0.6
-    if self.rect.bottom >= self.floor:
-      self.vel_y = 0
-      self.rect.bottom = self.floor
-      self.grounded = True
-    else:
-      self.grounded = False
-    if self.vel_y < 0 and (self.state == "idle" or self.state == "run"):
-      self.change_state("fall")
 
 
   # ends game when when death animation ends
@@ -71,12 +46,25 @@ class Player(entity.Entity):
       self.end_game()
 
 
-  # the sprite is left aligned, so the self.centerx is the x position of the actual player section of the image rather than the entire image
-  def update_center(self):
-    if self.direction:
-      self.centerx = self.rect.x + 33
+  # the sprite is left aligned, so centerx is the x position of the actual player section of the image rather than the entire image
+  # absolute=True means use absolute position to get the center
+  # absolute=False means use position on screen to get the center
+  # e.g., player may be at absolute position (500, 100), but they will always be at the center of the screen
+  def get_centerx(self, absolute=True):
+    if absolute:
+      if self.direction:
+        centerx = self.pos[0] + 33
+      else:
+        centerx = self.pos[0] + 62
     else:
-      self.centerx = self.rect.x + 55
+      if self.direction:
+        centerx = self.rect.x + 33
+      else:
+        centerx = self.rect.x + 62
+
+
+    return centerx
+
 
     
     

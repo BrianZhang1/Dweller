@@ -19,12 +19,13 @@ class Entity(pg.sprite.Sprite):
     self.direction_offset = direction_offset
     self.active_attack_frames = active_attack_frames
 
+    self.pos = list(init_pos)
+
     # Sprite variables
     self.image = self.animation_ref["idle"][0][0]
     self.image_length = self.animation_ref["idle"][0][0].get_height()
-    # rect controls the position of sprite
+    # rect controls the position of sprite when drawing
     self.rect = self.image.get_rect()
-    self.rect.bottomleft = init_pos
     # mask is for pixel perfect hitbox
     self.mask = pg.mask.from_surface(self.image)
 
@@ -40,6 +41,7 @@ class Entity(pg.sprite.Sprite):
     self.vel_y = 0
     self.direction = 1  # 1 = right, 0 = left
     self.move_direction = 0 # the direction the player is trying to move in.
+    self.floor = 367 # y position of floor
 
     # state variables
     self.state = None  # set at end of __init__()
@@ -56,29 +58,37 @@ class Entity(pg.sprite.Sprite):
     self.change_state("idle")
 
 
+
+
   # called once per tick
   def update(self, cur_time):
     self.cur_time = cur_time
-
-    if self.state == "idle" or self.state == "run":
-      if self.move_direction != 0:
-        self.move()
-      else:
-        if self.state == "run":
-          self.change_state("idle")
-          self.vel_x = 0
+    
+    self.handle_state()
 
     self.update_pos()
+    self.handle_gravity()
+
     if self.cur_time - self.last_animation > self.animation_cooldown and not self.animation_paused:
       self.animate()
 
 
+
+
   # updates position depending on velocity values
   def update_pos(self):
-    self.rect.x += self.vel_x
-    self.rect.y -= self.vel_y
+    self.pos[0] += self.vel_x
+    self.pos[1] -= self.vel_y
     
+  
+
+
+  def update_rect(self, offsetx):
+    self.rect.bottom = self.pos[1]
+    self.rect.left = self.pos[0] - offsetx
       
+
+
 
   # changes state of entity
   def change_state(self, new_state):
@@ -90,6 +100,8 @@ class Entity(pg.sprite.Sprite):
     self.animate()
         
       
+
+
   # sets the x velocity of the player depending on what direction they are trying to move in
   # actual change in position is controlled in update_pos() method
   def move(self):
@@ -103,7 +115,7 @@ class Entity(pg.sprite.Sprite):
       # if changing direction from right to left,
       if self.direction == 0:
         self.direction = 1
-        self.rect.x += self.direction_offset
+        self.pos[0] += self.direction_offset
         self.animate()
         
     # if trying to move left, set velocity accordingly
@@ -111,9 +123,10 @@ class Entity(pg.sprite.Sprite):
       self.vel_x = -self.speed
       if self.direction == 1:
         self.direction = 0
-        self.rect.x -= self.direction_offset
+        self.pos[0] -= self.direction_offset
         self.animate()
         
+
 
 
   # moves to next step in animation loop
@@ -128,18 +141,29 @@ class Entity(pg.sprite.Sprite):
       self.mask = pg.mask.from_surface(self.image)
     self.animation_step += 1
     
+
+
+
   def jump(self):
     if self.state == "idle" or self.state == "run":
       self.vel_y = 7
       self.change_state("jump")
 
+
+
+
   def handle_jump(self):
     if self.animation_step >= self.animation_ref["jump"][2]:
       self.change_state("fall")
 
+
+
+
   def handle_fall(self):
     if self.grounded:
       self.change_state("idle")
+
+
 
 
   def begin_attack(self):
@@ -149,15 +173,44 @@ class Entity(pg.sprite.Sprite):
       self.attack_sound_played = False
   
       # create hitbox for attack
-      hitbox_y = self.rect.y + self.image_length*0.2
+      hitbox_y = self.pos[1] + self.image_length*0.2
       hitbox_width = self.image_length*0.3
       hitbox_height = self.image_length*0.5
       if self.direction:
-        hitbox_x = self.rect.x + self.image_length*0.5
+        hitbox_x = self.pos[0] + self.image_length*0.5
       else:
-        hitbox_x = self.rect.x - self.image_length*0.35
+        hitbox_x = self.pos[0] - self.image_length*0.35
         
       self.attack_hitbox = pg.Rect(hitbox_x, hitbox_y, hitbox_width, hitbox_height)
+  
+
+
+
+  # handle states
+  def handle_state(self):
+    if self.state == "dead":
+      self.handle_dying()
+    elif self.state == "hurt":
+      self.handle_hurt()
+    elif self.state == "attack":
+      self.handle_attack()
+    elif self.state == "jump":
+      self.handle_jump()
+    elif self.state == "fall":
+      self.handle_fall()
+    else:
+      self.handle_idle()
+
+
+  def handle_idle(self):
+    if self.move_direction != 0:
+      self.move()
+    else:
+      self.vel_x = 0
+      if self.state == "run":
+        self.change_state("idle")
+
+
 
 
   # handles when entity is in attack state
@@ -182,16 +235,40 @@ class Entity(pg.sprite.Sprite):
         self.active_attack = False
 
 
+
+
   # handles when entity is in hurt state
   def handle_hurt(self):
     if self.animation_step > self.animation_ref["hurt"][2]:
       self.change_state("idle")
     
+
+
     
   # handles when entity is in dying state
   def handle_dying(self):
     if self.animation_step > self.animation_ref["dead"][2]:
       self.kill()
+
+
+
+
+  # handle falling, gravity
+  def handle_gravity(self):
+    if self.pos[1] > self.floor:
+      self.vel_y = 0
+      self.pos[1] = self.floor
+      self.grounded = True
+    elif self.pos[1] < self.floor:
+      self.vel_y -= 1
+      self.grounded = False
+    else:
+      self.grounded = True
+
+    if self.vel_y < 0 and (self.state == "idle" or self.state == "run"):
+      self.change_state("fall")
+
+
 
 
   # processes when entity gets attacked
@@ -207,9 +284,13 @@ class Entity(pg.sprite.Sprite):
         self.change_state("hurt")
 
 
+
+
   def pause_animation(self):
     self.animation_paused = True
     self.pause_time = self.cur_time
+
+
 
 
   def unpause_animation(self):

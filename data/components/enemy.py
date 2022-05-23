@@ -35,21 +35,21 @@ class Enemy(entity.Entity):
 
   # called once per tick
   def update(self, cur_time, player_centerx):
+    self.player_centerx = player_centerx
     super().update(cur_time)
-    
-    if self.state == "dead":
-      self.handle_dying()
-    elif self.state == "hurt":
-      self.handle_hurt()
-    elif self.state == "attack":
-      self.handle_attack()
-    else:
-      distance = player_centerx - self.rect.centerx
 
-      if abs(distance) < 40:
-        self.begin_attack()
-      else:
-        self.move_to_player(distance)
+
+  def handle_idle(self):
+    super().handle_idle()
+
+    centerx = self.pos[0] + self.image.get_width()/2  # centerx of self
+    distance = self.player_centerx - centerx
+
+    if abs(distance) < 40:
+      self.begin_attack()
+    else:
+      self.move_to_player(distance)
+
 
 
   # moves towards the player's location

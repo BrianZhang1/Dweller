@@ -25,7 +25,7 @@ class Healthbar:
     if not self.player:
       self.pos.centerx = self.entity.rect.centerx
     else:
-      self.pos.centerx = self.entity.centerx
+      self.pos.centerx = self.entity.get_centerx(absolute=False)
       
     self.pos.bottom = self.entity.rect.top + y_margin
 

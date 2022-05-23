@@ -42,6 +42,7 @@ class Game:
     self.player = player.Player(self.parent, self.resources, self.end_game)
     self.all_sprites.add(self.player)
     self.background_image = resources["background.png"]
+    self.offsetx = self.player.get_centerx() - self.screen_size[0]/2
 
     # start music
     pg.mixer.music.rewind()
@@ -56,7 +57,7 @@ class Game:
     
     if not self.game_over:
       self.player.update(self.cur_time)
-      self.enemies.update(self.cur_time, self.player.centerx)
+      self.enemies.update(self.cur_time, self.player.get_centerx())
       self.check_collision()
 
       if self.cur_time - self.last_enemy > self.enemy_cooldown:
@@ -125,11 +126,16 @@ class Game:
 
   # draws everything
   def render(self):
-    self.parent.blit(self.background_image, (0, 0))
-    self.all_sprites.draw(self.parent) # use pygame built-in draw function for sprite groups
-    # render healthbar of all sprites
+    self.scroll() # update screen offset
+
+    self.parent.blit(self.background_image, (0-self.offsetx, 0))
+
+    # update Rect position of all sprites to prepare to draw
     for sprite in self.all_sprites.sprites():
-      sprite.healthbar.render()
+      sprite.update_rect(self.offsetx)
+      sprite.healthbar.render() # render healthbar of all sprites
+    self.all_sprites.draw(self.parent) # use pygame built-in draw function for sprite groups
+
     # render score text
     self.ui.render_score(self.score)
     
@@ -182,6 +188,12 @@ class Game:
   # handles death of an enemy
   def handle_enemy_death(self):
     self.score += 1 # +1 score per enemy killed
+  
+
+  # handles scrolling of camera when player moves
+  def scroll(self):
+    new_offsetx = self.player.get_centerx() - self.screen_size[0]/2
+    self.offsetx = new_offsetx
 
   
   
