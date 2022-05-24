@@ -192,8 +192,18 @@ class Game:
 
   # handles scrolling of camera when player moves
   def scroll(self):
+    bg_w = self.background_image.get_width() # width of background
     new_offsetx = self.player.get_centerx() - self.screen_size[0]/2
-    self.offsetx = new_offsetx
+
+    # the offset cannot be less than 0
+    if new_offsetx < 0:
+      self.offsetx = 0
+    # the offset cannot go past the right side of the screen
+    elif new_offsetx > bg_w - self.screen_size[0]:
+      self.offsetx = bg_w - self.screen_size[0]
+    # otherwise, center the screen on the player position
+    else:
+      self.offsetx = new_offsetx
 
   
   
