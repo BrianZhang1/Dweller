@@ -67,17 +67,11 @@ class Player(entity.Entity):
 
   # set centerx of player
   # see get_centerx() for more details
-  def set_centerx(self, posx, absolute=True):
-    if absolute:
-      if self.direction:
-        self.pos[0] = posx - 33
-      else:
-        self.pos[0] = posx - 62
+  def set_centerx(self, posx):
+    if self.direction:
+      self.pos[0] = posx - 33
     else:
-      if self.direction:
-        self.rect.x = posx - 33
-      else:
-        self.rect.x = posx - 62
+      self.pos[0] = posx - 62
 
 
 

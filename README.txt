@@ -8,4 +8,4 @@ data/states contains a class for each state.
 data/components contains the objects needed for the game.  
 data/resource_handler loads all the assets.  
 
-code jump and add to entity class
+TODO: add platforms and floor

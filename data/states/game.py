@@ -1,6 +1,6 @@
 import random
 import pygame as pg
-from ..components import user_interface, player, enemy
+from ..components import user_interface, player, enemy, obstacle
 
 
 # Controls the game screen
@@ -36,12 +36,15 @@ class Game:
     # create sprite groups
     self.all_sprites = pg.sprite.Group()
     self.enemies = pg.sprite.Group()
+    self.obstacles = pg.sprite.Group()
 
     # create initial objects and add to sprite groups
     self.ui = user_interface.User_Interface(self.parent, self.resources)
     self.player = player.Player(self.parent, self.resources, self.end_game)
     self.all_sprites.add(self.player)
+
     self.background_image = resources["background.png"]
+    #self.floor = obstacle.Obstacle(0, 0)
     self.offsetx = self.player.get_centerx() - self.screen_size[0]/2
 
     # start music
