@@ -57,6 +57,7 @@ class Game:
     
     if not self.game_over:
       self.player.update(self.cur_time)
+      self.check_bounds()
       self.enemies.update(self.cur_time, self.player.get_centerx())
       self.check_collision()
 
@@ -204,6 +205,14 @@ class Game:
     # otherwise, center the screen on the player position
     else:
       self.offsetx = new_offsetx
+  
+  
+  # stops player from going out of bounds
+  def check_bounds(self):
+    if self.player.get_centerx() < 0:
+      self.player.set_centerx(0)
+    elif self.player.get_centerx() > self.background_image.get_width():
+      self.player.set_centerx(self.background_image.get_width())
 
   
   

@@ -146,7 +146,7 @@ class Entity(pg.sprite.Sprite):
 
   def jump(self):
     if self.state == "idle" or self.state == "run":
-      self.vel_y = 7
+      self.vel_y = 12
       self.change_state("jump")
 
 
