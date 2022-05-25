@@ -15,6 +15,7 @@ class Enemy(entity.Entity):
       "hurt": (resources["golem_hurt"], resources["golem_hurt_reverse"], 12),
       "dead": (resources["golem_death"], resources["golem_death_reverse"], 15)
     }
+    self.animation_ref["fall"] = self.animation_ref["idle"]
 
     active_attack_frames = [7, 8, 9] # which frames in attack animation is the attack hitbox actually active
     self.attack_recovery = 800 # time it takes to recover after finishing attack

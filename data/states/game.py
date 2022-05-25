@@ -1,6 +1,6 @@
 import random
 import pygame as pg
-from ..components import user_interface, player, enemy, obstacle
+from ..components import user_interface, player, enemy, terrain
 
 
 # Controls the game screen
@@ -33,6 +33,9 @@ class Game:
       print("invalid difficulty")
     
 
+    # create terrain handler
+    self.terrain_h = terrain.Terrain_Handler(self.parent, self.resources)
+
     # create sprite groups
     self.all_sprites = pg.sprite.Group()
     self.enemies = pg.sprite.Group()
@@ -43,7 +46,7 @@ class Game:
     self.player = player.Player(self.parent, self.resources, self.end_game)
     self.all_sprites.add(self.player)
 
-    self.background_image = resources["background.png"]
+    #self.background_image = resources["background.png"]
     #self.floor = obstacle.Obstacle(0, 0)
     self.offsetx = self.player.get_centerx() - self.screen_size[0]/2
 
@@ -68,7 +71,7 @@ class Game:
         self.generate_enemy_rand_side()
       
     # blits everything on parent surface
-    self.render()
+    self.draw()
       
 
     
@@ -128,11 +131,12 @@ class Game:
 
         
 
-  # draws everything
-  def render(self):
+  # draws everything in the game
+  def draw(self):
     self.scroll() # update screen offset
 
-    self.parent.blit(self.background_image, (0-self.offsetx, 0))
+    self.terrain_h.draw(self.offsetx)
+    #self.parent.blit(self.background_image, (0-self.offsetx, 0))
 
     # update Rect position of all sprites to prepare to draw
     for sprite in self.all_sprites.sprites():
@@ -196,7 +200,7 @@ class Game:
 
   # handles scrolling of camera when player moves
   def scroll(self):
-    bg_w = self.background_image.get_width() # width of background
+    bg_w = self.terrain_h.bg_w
     new_offsetx = self.player.get_centerx() - self.screen_size[0]/2
 
     # the offset cannot be less than 0
@@ -214,8 +218,8 @@ class Game:
   def check_bounds(self):
     if self.player.get_centerx() < 0:
       self.player.set_centerx(0)
-    elif self.player.get_centerx() > self.background_image.get_width():
-      self.player.set_centerx(self.background_image.get_width())
+    elif self.player.get_centerx() > self.terrain_h.bg_w:
+      self.player.set_centerx(self.terrain_h.bg_w)
 
   
   

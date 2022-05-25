@@ -41,7 +41,7 @@ class Entity(pg.sprite.Sprite):
     self.vel_y = 0
     self.direction = 1  # 1 = right, 0 = left
     self.move_direction = 0 # the direction the player is trying to move in.
-    self.floor = 367 # y position of floor
+    self.floor = 390 # y position of floor
 
     # state variables
     self.state = None  # set at end of __init__()
