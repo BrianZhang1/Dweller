@@ -23,7 +23,7 @@ class Player(entity.Entity):
     init_pos = (100, 367)
     active_attack_frames = [3, 4]
     self.attack_recovery = 400 # time it takes to recover after finishing attack
-    super().__init__(parent, resources, init_pos, 100, 3, 4, 20, active_attack_frames)
+    super().__init__(parent, resources, init_pos, 100, 3, 4, active_attack_frames)
     
     self.healthbar = healthbar.Healthbar(self.parent, self, player=True)
 
@@ -31,13 +31,31 @@ class Player(entity.Entity):
     self.attack_sound = self.resources["axe1.mp3"]
     self.hurt_sound = resources["player_hurt.mp3"]
     self.death_sound = resources["game_over.mp3"]
-    
 
 
-  # called once per tick
-  def update(self, cur_time):
-    super().update(cur_time)
 
+  # same as Entity.move, except it accounts for offset when flipping the image (since the player is not centered in the image)
+  def move(self):
+    # change state to run if state is idle
+    if self.state == "idle":
+      self.change_state("run")
+
+    # if trying to move right, set velocity accordingly
+    if self.move_direction == 1:
+      self.vel_x = self.speed
+      # if changing direction from right to left,
+      if self.direction == 0:
+        self.direction = 1
+        self.pos[0] += 27 # account for uncentered sprite
+        self.animate()
+        
+    # if trying to move left, set velocity accordingly
+    elif self.move_direction == -1:
+      self.vel_x = -self.speed
+      if self.direction == 1:
+        self.direction = 0
+        self.pos[0] -= 27 # account for uncentered sprite
+        self.animate()
 
 
   # ends game when when death animation ends
@@ -63,6 +81,12 @@ class Player(entity.Entity):
         centerx = self.rect.x + 62
 
     return centerx
+  
+  def get_centery(self):
+    return self.pos[1] - 32
+  
+  def get_center(self):
+    return (self.get_centerx(), self.get_centery())
   
 
   # set centerx of player

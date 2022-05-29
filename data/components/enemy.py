@@ -26,7 +26,7 @@ class Enemy(entity.Entity):
       health = 3
     if difficulty == "hard":
       health = 4
-    super().__init__(parent, resources, init_pos, 50, health, 2, 0, active_attack_frames)
+    super().__init__(parent, resources, init_pos, 50, health, 2, active_attack_frames)
 
     # load sounds
     self.attack_sound = resources["swing.mp3"]

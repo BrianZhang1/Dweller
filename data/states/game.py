@@ -67,11 +67,14 @@ class Game:
       self.enemies.update(self.cur_time, self.player.get_centerx())
       self.check_collision()
 
-      if self.cur_time - self.last_enemy > self.enemy_cooldown:
-        self.generate_enemy_rand_side()
+      #if self.cur_time - self.last_enemy > self.enemy_cooldown:
+      #  self.generate_enemy_rand_side()
       
     # blits everything on parent surface
     self.draw()
+    for tile in self.terrain_h.get_nearby_tiles(self.player.get_center()):
+      if tile:
+        tile.visible = False
       
 
     
@@ -167,12 +170,14 @@ class Game:
 
   # check for collisions
   def check_collision(self):
+    # check collision between enemy/player
     for enemy_obj in pg.sprite.spritecollide(self.player, self.enemies, False, pg.sprite.collide_mask):
       # active_attack attribute means whether their attack hitbox is active
       if self.player.active_attack:
         enemy_obj.receive_attack(1)
       elif enemy_obj.active_attack:
         self.player.receive_attack(1)
+    
 
 
   def generate_enemy_rand_side(self):

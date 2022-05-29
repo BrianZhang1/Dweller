@@ -7,7 +7,7 @@ from . import healthbar
 
 # objects that inherit from Entity MUST have a self.animation_ref dictionary containing all assets for animation before calling __init__ method of the Entity class
 class Entity(pg.sprite.Sprite):
-  def __init__(self, parent, resources, init_pos, animation_cooldown, health, speed, direction_offset, active_attack_frames):
+  def __init__(self, parent, resources, init_pos, animation_cooldown, health, speed, active_attack_frames):
     super().__init__()
     self.cur_time = pg.time.get_ticks()
     
@@ -16,7 +16,6 @@ class Entity(pg.sprite.Sprite):
     self.max_health = health
     self.health = health
     self.speed = speed
-    self.direction_offset = direction_offset
     self.active_attack_frames = active_attack_frames
 
     self.pos = list(init_pos)
@@ -112,10 +111,9 @@ class Entity(pg.sprite.Sprite):
     # if trying to move right, set velocity accordingly
     if self.move_direction == 1:
       self.vel_x = self.speed
-      # if changing direction from right to left,
+      # if changing direction from right to left, immediately move to next animation step (so there is no apparent lag in changing directions)
       if self.direction == 0:
         self.direction = 1
-        self.pos[0] += self.direction_offset
         self.animate()
         
     # if trying to move left, set velocity accordingly
@@ -123,7 +121,6 @@ class Entity(pg.sprite.Sprite):
       self.vel_x = -self.speed
       if self.direction == 1:
         self.direction = 0
-        self.pos[0] -= self.direction_offset
         self.animate()
         
 
