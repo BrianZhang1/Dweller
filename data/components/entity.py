@@ -39,7 +39,7 @@ class Entity(pg.sprite.Sprite):
     self.vel_x = 0
     self.vel_y = 0
     self.direction = 1  # 1 = right, 0 = left
-    self.move_direction = 0 # the direction the player is trying to move in.
+    self.move_direction = 0 # the direction the entity is trying to move in.
     self.floor = 390 # y position of floor
 
     # state variables
@@ -282,15 +282,13 @@ class Entity(pg.sprite.Sprite):
 
 
 
-
   def pause_animation(self):
     self.animation_paused = True
     self.pause_time = self.cur_time
 
 
 
-
   def unpause_animation(self):
     self.animation_paused = False
     self.pause_time = None
-    
+  

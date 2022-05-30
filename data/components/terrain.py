@@ -4,12 +4,14 @@ import pygame as pg
 
 # class for an individual tile
 class Tile:
-    def __init__(self, resources, type):
+    def __init__(self, resources, type, list_pos, pos):
         # top/right/bottom/left are boolean values that identify the tiles surrounding this tile
         # e.g., top = True means there is a tile above this one
 
         self.resources = resources
         self.type = type
+        self.list_pos = list_pos # position of tile in tilemap
+        self.pos = pos # absolute pos
 
         self.image = None
 
@@ -43,8 +45,9 @@ class Tile:
 
 
     # draws this tile
-    def draw(self, parent, pos):
+    def draw(self, parent, offsetx):
         if self.type != 0:
+            pos = (self.pos[0]-offsetx, self.pos[1])
             parent.blit(self.image, pos)
 
 
@@ -76,10 +79,7 @@ class Terrain_Handler:
             for i in range(cols):
                 col = []
                 for k in range(rows):
-                    if k == rows-1:
-                        col.append(1)
-                    else:
-                        col.append(0)
+                    col.append(1)
                 sample_tilemap.append(col)
             
             self.load_tilemap(sample_tilemap)
@@ -89,6 +89,10 @@ class Terrain_Handler:
     # tilemap argument is a 2d array of tiles
     # it loads the data from the tilemap into Tile objects and creates a new tilemap
     def load_tilemap(self, tilemap):
+        # topleft is the topleft corner of where the tiles start rendering relative to the topleft of the screen
+        topleft = [0, 0]
+        pos = topleft.copy()
+
         new_tilemap = []
         for i in range(len(tilemap)):
             col = []
@@ -115,10 +119,13 @@ class Terrain_Handler:
                     if k != len(tilemap[i])-1:
                         if tilemap[i][k+1] != 0:
                             bottom = True
-                    tile = Tile(self.resources, type=1)
+                    tile = Tile(self.resources, type=1, list_pos=(i, k), pos=(pos[0], pos[1]))
                     tile.load_image(top, right, bottom, left)
                     col.append(tile)
+                pos[1] += self.tile_size
             new_tilemap.append(col)
+            pos[1] = topleft[1]
+            pos[0] += int(self.tile_size)
         self.tilemap = new_tilemap
 
 
@@ -136,18 +143,12 @@ class Terrain_Handler:
     
     # draw the tilemap onto the screen
     def draw_tiles(self, offsetx):
-        # topleft is the topleft corner of where the tiles start rendering relative to the topleft of the screen
-        topleft = [-1*offsetx, 0]
-        pos = topleft.copy()
         for col in self.tilemap:
             for tile in col:
-                if tile.type == 1:
-                    tile.draw(self.parent, pos)
-                pos[1] += self.tile_size
-            pos[1] = topleft[1]
-            pos[0] += int(self.tile_size)
+                tile.draw(self.parent, offsetx)
     
 
+    # returns a list of all nearby tiles
     # pos is the position to find tiles nearby
     # radius is how many tiles the search should be
     def get_nearby_tiles(self, pos, radius=2):

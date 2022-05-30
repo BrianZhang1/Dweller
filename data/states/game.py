@@ -74,7 +74,7 @@ class Game:
     self.draw()
     for tile in self.terrain_h.get_nearby_tiles(self.player.get_center()):
       if tile:
-        tile.visible = False
+        tile.type = 0
       
 
     
@@ -178,6 +178,14 @@ class Game:
       elif enemy_obj.active_attack:
         self.player.receive_attack(1)
     
+
+  # check collisions between entities and nearby tiles
+  def check_tile_collision(self, entity):
+    nearby_tiles = self.terrain_h.get_nearby_tiles(entity.pos, radius=2)
+    for tile in nearby_tiles:
+      if tile.type == 1:
+        pass
+        # check for collision and stuff
 
 
   def generate_enemy_rand_side(self):
