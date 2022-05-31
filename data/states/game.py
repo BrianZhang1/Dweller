@@ -72,9 +72,6 @@ class Game:
       
     # blits everything on parent surface
     self.draw()
-    for tile in self.terrain_h.get_nearby_tiles(self.player.get_center()):
-      if tile:
-        tile.type = 0
       
 
     
@@ -178,6 +175,19 @@ class Game:
       elif enemy_obj.active_attack:
         self.player.receive_attack(1)
     
+    # check collision between entities and tiles
+    player_rect = self.player.mask.get_rect(topleft=self.player.rect.topleft)
+    nearby_tiles = self.terrain_h.get_nearby_tiles(self.player.get_center(), radius=2)
+    tile_size = self.terrain_h.tile_size
+
+    top_index = 3
+    if nearby_tiles[top_index].type == 1:
+      top_rect = pg.Rect((nearby_tiles[top_index].pos[0]-self.offsetx, nearby_tiles[top_index].pos[1]), (tile_size, tile_size))
+      if player_rect.colliderect(top_rect):
+        if self.player.vel_y > 0:
+          self.player.vel_y = 0
+
+    
 
   # check collisions between entities and nearby tiles
   def check_tile_collision(self, entity):
@@ -233,6 +243,7 @@ class Game:
       self.player.set_centerx(0)
     elif self.player.get_centerx() > self.terrain_h.bg_w:
       self.player.set_centerx(self.terrain_h.bg_w)
+
 
   
   

@@ -15,11 +15,10 @@ class Tile:
 
         self.image = None
 
-    
-    
+
     # loads image for the tile depending on the tiles surrounding it
     def load_image(self, top, right, bottom, left):
-        if self.type == 1:
+        if self.type != 0:
             if top:
                 self.image = self.resources["Tile_04.png"]
             elif bottom:
@@ -42,7 +41,7 @@ class Tile:
                 self.image = self.resources["Tile_08.png"]
             else:
                 print("An error has occured while loading a tile image.")
-
+    
 
     # draws this tile
     def draw(self, parent, offsetx):
@@ -79,7 +78,12 @@ class Terrain_Handler:
             for i in range(cols):
                 col = []
                 for k in range(rows):
-                    col.append(1)
+                    if k == rows-1:
+                        col.append(1)
+                    elif k == rows-4 and i == 6:
+                        col.append(1)
+                    else:
+                        col.append(0)
                 sample_tilemap.append(col)
             
             self.load_tilemap(sample_tilemap)
@@ -99,7 +103,7 @@ class Terrain_Handler:
             for k in range(len(tilemap[i])):
                 # if the tile is empty, append an empty tile
                 if tilemap[i][k] == 0:
-                    col.append(Tile(self.resources, type=0))
+                    col.append(Tile(self.resources, type=0, list_pos=None, pos=None))
                 else:
                     # False = empty, True = filled
                     # e.g., top = False means there is no tile above this tile
