@@ -32,27 +32,29 @@ class Player(entity.Entity):
     self.hurt_sound = resources["player_hurt.mp3"]
     self.death_sound = resources["game_over.mp3"]
 
+    # DISTANCE CONSTANTS
+    # distance from side of image to side of actual sprite
+    # e.g., left is distance from left of image to where the the left side of the sprite starts
+    self.dist_consts = {
+      "left": 14,
+      "bottom": 0,
+      "right": -45,
+      "top": 32,
+      "left_to_centerx": 34
+    }
+
 
 
   # same as Entity.move, except it accounts for offset when flipping the image (since the player is not centered in the image)
-  def move(self):
-    # change state to run if state is idle
-    if self.state == "idle":
-      self.change_state("run")
+  
 
-    # if trying to move right, set velocity accordingly
-    if self.move_direction == 1:
-      self.vel_x = self.speed
-      # if changing direction from right to left,
-      if self.direction == 0:
+  def try_change_direction(self, new_direction):
+    if new_direction != 0:
+      if self.direction == 0 and new_direction == 1:
         self.direction = 1
         self.pos[0] += 27 # account for uncentered sprite
         self.animate()
-        
-    # if trying to move left, set velocity accordingly
-    elif self.move_direction == -1:
-      self.vel_x = -self.speed
-      if self.direction == 1:
+      elif self.direction == 1 and new_direction == -1:
         self.direction = 0
         self.pos[0] -= 27 # account for uncentered sprite
         self.animate()
@@ -64,6 +66,25 @@ class Player(entity.Entity):
       self.end_game()
 
 
+  # gets rect of the actual player
+  def get_rect(self):
+    # rect position is different depending on which way the player is facing
+    if self.direction:
+      rect_bottomleft = (self.rect.left+14, self.rect.bottom) # (x, y)
+      rect_size = (36, 64)
+      rect = pg.Rect((0, 0), rect_size)
+      rect.bottomleft = rect_bottomleft
+    else:
+      rect_bottomright = (self.rect.right-14, self.rect.bottom) # (x, y)
+      rect_size = (36, 64)
+      rect = pg.Rect((0, 0), rect_size)
+      rect.bottomright = rect_bottomright
+      
+
+    return rect
+    
+
+
   # the sprite is left aligned, so centerx is the x position of the actual player section of the image rather than the entire image
   # absolute=True means use absolute position to get the center
   # absolute=False means use position on screen to get the center
@@ -71,12 +92,12 @@ class Player(entity.Entity):
   def get_centerx(self, absolute=True):
     if absolute:
       if self.direction:
-        centerx = self.pos[0] + 33
+        centerx = self.pos[0] + 34
       else:
         centerx = self.pos[0] + 62
     else:
       if self.direction:
-        centerx = self.rect.x + 33
+        centerx = self.rect.x + 34
       else:
         centerx = self.rect.x + 62
 
@@ -93,12 +114,22 @@ class Player(entity.Entity):
   # see get_centerx() for more details
   def set_centerx(self, posx):
     if self.direction:
-      self.pos[0] = posx - 33
+      self.pos[0] = posx - 34
     else:
       self.pos[0] = posx - 62
 
 
+  def set_bottom(self, bottom):
+    self.pos[1] = bottom
+
+
+  def set_left(self, left):
+    if self.direction:
+      self.pos[0] = left-14
+    else:
+      self.pos[0] = left-45
+
+
 
     
     
-  

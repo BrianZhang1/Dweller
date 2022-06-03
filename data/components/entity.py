@@ -18,7 +18,7 @@ class Entity(pg.sprite.Sprite):
     self.speed = speed
     self.active_attack_frames = active_attack_frames
 
-    self.pos = list(init_pos)
+    self.pos = list(init_pos)  # bottom left pos
 
     # Sprite variables
     self.image = self.animation_ref["idle"][0][0]
@@ -89,6 +89,7 @@ class Entity(pg.sprite.Sprite):
 
 
 
+    # WHERE IS IT CHANGING STATE TO FALL???
   # changes state of entity
   def change_state(self, new_state):
     self.unpause_animation()
@@ -104,25 +105,39 @@ class Entity(pg.sprite.Sprite):
   # sets the x velocity of the player depending on what direction they are trying to move in
   # actual change in position is controlled in update_pos() method
   def move(self):
-    # change state to run if state is idle
-    if self.state == "idle":
-      self.change_state("run")
 
     # if trying to move right, set velocity accordingly
     if self.move_direction == 1:
       self.vel_x = self.speed
-      # if changing direction from right to left, immediately move to next animation step (so there is no apparent lag in changing directions)
-      if self.direction == 0:
-        self.direction = 1
-        self.animate()
+      # change state to run if state is idle
+      if self.state == "idle":
+        self.change_state("run")
         
     # if trying to move left, set velocity accordingly
     elif self.move_direction == -1:
       self.vel_x = -self.speed
-      if self.direction == 1:
+      # change state to run if state is idle
+      if self.state == "idle":
+        self.change_state("run")
+
+    elif self.move_direction == 0:
+      self.vel_x = 0
+      if self.state == "run":
+        self.change_state("idle")
+    
+    self.try_change_direction(self.move_direction)
+        
+  
+
+  # if changing direction, immediately move to next animation step (so there is no apparent lag in changing directions)
+  def try_change_direction(self, new_direction):
+    if new_direction != 0:
+      if self.direction == 0 and new_direction == 1:
+        self.direction = 1
+        self.animate()
+      elif self.direction == 1 and new_direction == -1:
         self.direction = 0
         self.animate()
-        
 
 
 
@@ -145,21 +160,6 @@ class Entity(pg.sprite.Sprite):
     if self.state == "idle" or self.state == "run":
       self.vel_y = 12
       self.change_state("jump")
-
-
-
-
-  def handle_jump(self):
-    if self.animation_step >= self.animation_ref["jump"][2]:
-      self.change_state("fall")
-
-
-
-
-  def handle_fall(self):
-    if self.grounded:
-      self.change_state("idle")
-
 
 
 
@@ -200,15 +200,23 @@ class Entity(pg.sprite.Sprite):
 
 
   def handle_idle(self):
-    if self.move_direction != 0:
-      self.move()
-    else:
-      self.vel_x = 0
-      if self.state == "run":
-        self.change_state("idle")
+    self.move()
 
 
 
+  def handle_jump(self):
+    self.move()
+    if self.animation_step >= self.animation_ref["jump"][2]:
+      self.change_state("fall")
+
+
+  
+  def handle_fall(self):
+    self.move()
+    if self.grounded:
+      self.change_state("idle")
+
+      
 
   # handles when entity is in attack state
   def handle_attack(self):
@@ -252,16 +260,9 @@ class Entity(pg.sprite.Sprite):
 
   # handle falling, gravity
   def handle_gravity(self):
-    if self.pos[1] > self.floor:
-      self.vel_y = 0
-      self.pos[1] = self.floor
-      self.grounded = True
-    elif self.pos[1] < self.floor:
+    if not self.grounded:
       self.vel_y -= 1
-      self.grounded = False
-    else:
-      self.grounded = True
-
+      
     if self.vel_y < 0 and (self.state == "idle" or self.state == "run"):
       self.change_state("fall")
 

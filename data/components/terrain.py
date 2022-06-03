@@ -11,7 +11,7 @@ class Tile:
         self.resources = resources
         self.type = type
         self.list_pos = list_pos # position of tile in tilemap
-        self.pos = pos # absolute pos
+        self.pos = pos # absolute pos (topleft)
 
         self.image = None
 
@@ -40,7 +40,7 @@ class Tile:
             elif left:
                 self.image = self.resources["Tile_08.png"]
             else:
-                print("An error has occured while loading a tile image.")
+                self.image = self.resources["Tile_18.png"]
     
 
     # draws this tile
@@ -80,7 +80,9 @@ class Terrain_Handler:
                 for k in range(rows):
                     if k == rows-1:
                         col.append(1)
-                    elif k == rows-4 and i == 6:
+                    elif k == rows-4 and i in [6, 7, 8]:
+                        col.append(1)
+                    elif k == rows-5 and i in [12, 13, 14, 15]:
                         col.append(1)
                     else:
                         col.append(0)
@@ -163,9 +165,9 @@ class Terrain_Handler:
         for i in range(2*radius-1):
             for k in range(2*radius-1):
                 try:
-                    nearby_tiles.append(self.tilemap[t[0]+i][t[1]+k])
+                  nearby_tiles.append(self.tilemap[t[0]+i][t[1]+k])
                 except IndexError:
-                    pass
+                  pass
         
         return nearby_tiles
 
