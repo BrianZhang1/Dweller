@@ -80,7 +80,9 @@ class Terrain_Handler:
                 for k in range(rows):
                     if k == rows-1:
                         col.append(1)
-                    elif k == rows-4 and i in [6, 7, 8]:
+                    elif i == 1 and k == rows-4:
+                        col.append(1)
+                    elif (k == rows-4 or k == rows-3 or k == rows-2) and i in [6, 7, 8]:
                         col.append(1)
                     elif k == rows-5 and i in [12, 13, 14, 15]:
                         col.append(1)

@@ -3,7 +3,7 @@ import pygame as pg
 from . import entity, healthbar
 
 class Player(entity.Entity):
-  def __init__(self, parent, resources, end_game):
+  def __init__(self, parent, resources, end_game, get_nearby_tiles):
 
     # callback method when player dies to end the game
     self.end_game = end_game
@@ -23,7 +23,7 @@ class Player(entity.Entity):
     init_pos = (100, 367)
     active_attack_frames = [3, 4]
     self.attack_recovery = 400 # time it takes to recover after finishing attack
-    super().__init__(parent, resources, init_pos, 100, 3, 4, active_attack_frames)
+    super().__init__(parent, resources, init_pos, 100, 3, 4, active_attack_frames, get_nearby_tiles)
     
     self.healthbar = healthbar.Healthbar(self.parent, self, player=True)
 
@@ -67,18 +67,24 @@ class Player(entity.Entity):
 
 
   # gets rect of the actual player
-  def get_rect(self):
+  def get_rect(self, offsetx, bottomleft=None):
+    # default bottomleft is self.pos
+    if bottomleft == None:
+      bottomleft = self.pos.copy()
+    
+    bottomleft = (bottomleft[0]-offsetx, bottomleft[1])
+
     # rect position is different depending on which way the player is facing
     if self.direction:
-      rect_bottomleft = (self.rect.left+14, self.rect.bottom) # (x, y)
+      rect_bottomleft = (bottomleft[0]+14, bottomleft[1]) # (x, y)
       rect_size = (36, 64)
       rect = pg.Rect((0, 0), rect_size)
       rect.bottomleft = rect_bottomleft
     else:
-      rect_bottomright = (self.rect.right-14, self.rect.bottom) # (x, y)
+      rect_bottomleft = (bottomleft[0]+45, bottomleft[1]) # (x, y)
       rect_size = (36, 64)
       rect = pg.Rect((0, 0), rect_size)
-      rect.bottomright = rect_bottomright
+      rect.bottomleft = rect_bottomleft
       
 
     return rect
@@ -128,8 +134,51 @@ class Player(entity.Entity):
       self.pos[0] = left-14
     else:
       self.pos[0] = left-45
-
-
-
     
-    
+
+
+  # FIX WALL CLIMBING
+  def update_pos(self, offsetx):
+    newx = self.pos[0] + self.vel_x
+    newy = self.pos[1] - self.vel_y
+    new_bottomleft = (newx, newy)
+    rect = self.get_rect(offsetx)
+    new_rect = self.get_rect(offsetx, new_bottomleft)
+    grounded = False
+    x_changed = False
+
+    tiles = self.get_nearby_tiles(self.get_center(), 3)
+    tile_size = 32  # CHANGE TO VARIABLE
+    for tile in tiles:
+      if tile.type == 1:
+        tile_rect = pg.Rect((tile.pos[0] - offsetx, tile.pos[1]), (tile_size, tile_size))
+        if new_rect.colliderect(tile_rect):
+          if rect.bottom <= tile_rect.top:
+            print("yyy")
+            newy = tile_rect.top
+            grounded = True
+            if self.vel_y < 0:
+              self.vel_y = 0
+          elif rect.top >= tile_rect.bottom:
+            newy = tile_rect.bottom + rect.height
+            if self.vel_y > 0:
+              self.vel_y = 0
+          elif rect.left >= tile_rect.right:
+            print("xxx")
+            x_changed = True
+            new_left = tile_rect.right+offsetx
+            self.set_left(new_left)
+            if self.vel_x < 0:
+              self.vel_x = 0
+          elif rect.right <= tile_rect.left:
+            x_changed = True
+            new_left = tile_rect.left - rect.width + offsetx
+            self.set_left(new_left)
+            if self.vel_x > 0:
+              self.vel_x = 0
+    self.grounded = grounded
+    if x_changed:
+      self.pos[1] = newy
+    else:
+      self.pos = [newx, newy]
+      

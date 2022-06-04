@@ -43,7 +43,7 @@ class Game:
 
         # create initial objects and add to sprite groups
         self.ui = user_interface.User_Interface(self.parent, self.resources)
-        self.player = player.Player(self.parent, self.resources, self.end_game)
+        self.player = player.Player(self.parent, self.resources, self.end_game, self.terrain_h.get_nearby_tiles)
         self.all_sprites.add(self.player)
 
         #self.background_image = resources["background.png"]
@@ -61,8 +61,7 @@ class Game:
         self.handle_events()
 
         if not self.game_over:
-            self.player.update(self.cur_time)
-            self.check_tile_collision(self.player)
+            self.player.update(self.cur_time, self.offsetx)
             self.check_bounds()
             self.enemies.update(self.cur_time, self.player.get_centerx())
             self.check_collision()
@@ -136,7 +135,7 @@ class Game:
         for sprite in self.all_sprites.sprites():
             sprite.update_rect(self.offsetx)
             sprite.healthbar.render()  # render healthbar of all sprites
-        pg.draw.rect(self.parent, "red", self.player.get_rect())
+        pg.draw.rect(self.parent, "red", self.player.get_rect(self.offsetx))
         self.all_sprites.draw(
             self.parent)  # use pygame built-in draw function for sprite groups
 
@@ -216,8 +215,7 @@ class Game:
     # spawn new enemy
     def generate_enemy(self, pos):
         self.last_enemy = self.cur_time
-        enemy_obj = enemy.Enemy(self.parent, self.resources, pos,
-                                self.handle_enemy_death, self.difficulty)
+        enemy_obj = enemy.Enemy(self.parent, self.resources, pos, self.handle_enemy_death, self.difficulty, self.terrain_h.get_nearby_tiles)
         self.all_sprites.add(self.player, enemy_obj)
         self.enemies.add(enemy_obj)
 

@@ -2,7 +2,7 @@ import pygame as pg
 from . import entity
 
 class Enemy(entity.Entity):
-  def __init__(self, parent, resources, init_pos, death_callback, difficulty):
+  def __init__(self, parent, resources, init_pos, death_callback, difficulty, get_nearby_tiles):
 
     self.death_callback = death_callback
     
@@ -26,7 +26,7 @@ class Enemy(entity.Entity):
       health = 3
     if difficulty == "hard":
       health = 4
-    super().__init__(parent, resources, init_pos, 50, health, 2, active_attack_frames)
+    super().__init__(parent, resources, init_pos, 50, health, 2, active_attack_frames, get_nearby_tiles)
 
     # load sounds
     self.attack_sound = resources["swing.mp3"]

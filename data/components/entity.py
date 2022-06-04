@@ -7,7 +7,7 @@ from . import healthbar
 
 # objects that inherit from Entity MUST have a self.animation_ref dictionary containing all assets for animation before calling __init__ method of the Entity class
 class Entity(pg.sprite.Sprite):
-  def __init__(self, parent, resources, init_pos, animation_cooldown, health, speed, active_attack_frames):
+  def __init__(self, parent, resources, init_pos, animation_cooldown, health, speed, active_attack_frames, get_nearby_tiles):
     super().__init__()
     self.cur_time = pg.time.get_ticks()
     
@@ -17,6 +17,7 @@ class Entity(pg.sprite.Sprite):
     self.health = health
     self.speed = speed
     self.active_attack_frames = active_attack_frames
+    self.get_nearby_tiles = get_nearby_tiles # method to get tiles near this entity
 
     self.pos = list(init_pos)  # bottom left pos
 
@@ -60,12 +61,12 @@ class Entity(pg.sprite.Sprite):
 
 
   # called once per tick
-  def update(self, cur_time):
+  def update(self, cur_time, offsetx):
     self.cur_time = cur_time
     
     self.handle_state()
 
-    self.update_pos()
+    self.update_pos(offsetx)
     self.handle_gravity()
 
     if self.cur_time - self.last_animation > self.animation_cooldown and not self.animation_paused:
@@ -75,10 +76,14 @@ class Entity(pg.sprite.Sprite):
 
 
   # updates position depending on velocity values
-  def update_pos(self):
+  def update_pos(self, offsetx):
     self.pos[0] += self.vel_x
     self.pos[1] -= self.vel_y
-    
+  
+
+
+  def check_tile_collisions(self):
+    pass
   
 
 
@@ -158,7 +163,7 @@ class Entity(pg.sprite.Sprite):
 
   def jump(self):
     if self.state == "idle" or self.state == "run":
-      self.vel_y = 12
+      self.vel_y = 14
       self.change_state("jump")
 
 
@@ -260,10 +265,9 @@ class Entity(pg.sprite.Sprite):
 
   # handle falling, gravity
   def handle_gravity(self):
-    if not self.grounded:
-      self.vel_y -= 1
+    self.vel_y -= 1
       
-    if self.vel_y < 0 and (self.state == "idle" or self.state == "run"):
+    if not self.grounded and (self.state == "idle" or self.state == "run"):
       self.change_state("fall")
 
 
