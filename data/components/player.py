@@ -23,6 +23,9 @@ class Player(entity.Entity):
     init_pos = (100, 367)
     active_attack_frames = [3, 4]
     self.attack_recovery = 400 # time it takes to recover after finishing attack
+    self.jump_count = 0
+    self.jump_ability = 1  # how many jumps the player can make in the air
+    self.jump_power = 12 # how high the player can jump in 1 jump
     super().__init__(parent, resources, init_pos, 100, 3, 4, active_attack_frames, get_nearby_tiles)
     
     self.healthbar = healthbar.Healthbar(self.parent, self, player=True)
@@ -47,6 +50,20 @@ class Player(entity.Entity):
 
   # same as Entity.move, except it accounts for offset when flipping the image (since the player is not centered in the image)
   
+
+  def update(self, cur_time, offsetx):
+    super().update(cur_time, offsetx)
+    if self.grounded:
+      self.jump_count = 0
+
+  
+  # override entity.jump so player can double jump
+  def jump(self):
+    if self.jump_count <= self.jump_ability:
+      self.vel_y = self.jump_power
+      self.jump_count += 1
+      self.change_state("jump")
+
 
   def try_change_direction(self, new_direction):
     if new_direction != 0:
@@ -154,7 +171,6 @@ class Player(entity.Entity):
         tile_rect = pg.Rect((tile.pos[0] - offsetx, tile.pos[1]), (tile_size, tile_size))
         if new_rect.colliderect(tile_rect):
           if rect.bottom <= tile_rect.top:
-            print("yyy")
             newy = tile_rect.top
             grounded = True
             if self.vel_y < 0:
@@ -164,7 +180,6 @@ class Player(entity.Entity):
             if self.vel_y > 0:
               self.vel_y = 0
           elif rect.left >= tile_rect.right:
-            print("xxx")
             x_changed = True
             new_left = tile_rect.right+offsetx
             self.set_left(new_left)

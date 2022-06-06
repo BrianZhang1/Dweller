@@ -169,21 +169,19 @@ class Entity(pg.sprite.Sprite):
 
 
   def begin_attack(self):
-    if self.state == "idle" or self.state == "run":
-      self.change_state("attack")
-      self.vel_x = 0
-      self.attack_sound_played = False
-  
-      # create hitbox for attack
-      hitbox_y = self.pos[1] + self.image_length*0.2
-      hitbox_width = self.image_length*0.3
-      hitbox_height = self.image_length*0.5
-      if self.direction:
-        hitbox_x = self.pos[0] + self.image_length*0.5
-      else:
-        hitbox_x = self.pos[0] - self.image_length*0.35
-        
-      self.attack_hitbox = pg.Rect(hitbox_x, hitbox_y, hitbox_width, hitbox_height)
+    self.change_state("attack")
+    self.attack_sound_played = False
+
+    # create hitbox for attack
+    hitbox_y = self.pos[1] + self.image_length*0.2
+    hitbox_width = self.image_length*0.3
+    hitbox_height = self.image_length*0.5
+    if self.direction:
+      hitbox_x = self.pos[0] + self.image_length*0.5
+    else:
+      hitbox_x = self.pos[0] - self.image_length*0.35
+      
+    self.attack_hitbox = pg.Rect(hitbox_x, hitbox_y, hitbox_width, hitbox_height)
   
 
 
@@ -225,24 +223,18 @@ class Entity(pg.sprite.Sprite):
 
   # handles when entity is in attack state
   def handle_attack(self):
-    if self.animation_paused:
-      if self.cur_time - self.pause_time > self.attack_recovery:
-        self.unpause_animation()
-        self.animate()
+    self.move()
+    if self.animation_step > self.animation_ref["attack"][2]:
+      self.change_state("idle")
+      
+    if self.animation_step in self.active_attack_frames:
+      if not self.attack_sound_played:
+        self.attack_sound.play()
+        self.attack_sound_played = True
+      self.active_attack = True
+      
     else:
-      if self.animation_step == self.animation_ref["attack"][2]-1:
-        self.pause_animation()
-      elif self.animation_step > self.animation_ref["attack"][2]:
-        self.change_state("idle")
-        
-      if self.animation_step in self.active_attack_frames:
-        if not self.attack_sound_played:
-          self.attack_sound.play()
-          self.attack_sound_played = True
-        self.active_attack = True
-        
-      else:
-        self.active_attack = False
+      self.active_attack = False
 
 
 

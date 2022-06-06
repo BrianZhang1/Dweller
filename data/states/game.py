@@ -108,21 +108,6 @@ class Game:
                             elif click_target == "load_main_menu":
                                 self.load_main_menu(score=self.score)
 
-    # handles keyboard input to move player
-    def handle_keyboard(self):
-        if self.player.state == "idle" or self.player.state == "run":
-            keys_pressed = pg.key.get_pressed()
-            a_pressed = keys_pressed[pg.K_a]
-            d_pressed = keys_pressed[pg.K_d]
-            space_pressed = keys_pressed[pg.K_SPACE]
-            if d_pressed and not a_pressed:
-                self.player.move(1)
-            elif a_pressed and not d_pressed:
-                self.player.move(-1)
-            else:
-                self.player.move(0)
-            if space_pressed:
-                self.player.jump()
 
     # draws everything in the game
     def draw(self):
@@ -135,7 +120,6 @@ class Game:
         for sprite in self.all_sprites.sprites():
             sprite.update_rect(self.offsetx)
             sprite.healthbar.render()  # render healthbar of all sprites
-        pg.draw.rect(self.parent, "red", self.player.get_rect(self.offsetx))
         self.all_sprites.draw(
             self.parent)  # use pygame built-in draw function for sprite groups
 
