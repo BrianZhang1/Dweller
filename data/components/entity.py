@@ -257,10 +257,10 @@ class Entity(pg.sprite.Sprite):
 
   # handle falling, gravity
   def handle_gravity(self):
-    self.vel_y -= 1
-      
-    if not self.grounded and (self.state == "idle" or self.state == "run"):
-      self.change_state("fall")
+    if not self.grounded: 
+      self.vel_y -= 1
+      if self.state == "idle" or self.state == "run":
+        self.change_state("fall")
 
 
 

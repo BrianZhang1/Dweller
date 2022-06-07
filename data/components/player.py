@@ -169,17 +169,12 @@ class Player(entity.Entity):
     for tile in tiles:
       if tile.type == 1:
         tile_rect = pg.Rect((tile.pos[0] - offsetx, tile.pos[1]), (tile_size, tile_size))
+        if rect.bottom == tile_rect.top-1 and rect.right > tile_rect.left and rect.left < tile_rect.right:
+          grounded = True
+          if self.vel_y < 0:
+            self.vel_y = 0
         if new_rect.colliderect(tile_rect):
-          if rect.bottom <= tile_rect.top:
-            newy = tile_rect.top
-            grounded = True
-            if self.vel_y < 0:
-              self.vel_y = 0
-          elif rect.top >= tile_rect.bottom:
-            newy = tile_rect.bottom + rect.height
-            if self.vel_y > 0:
-              self.vel_y = 0
-          elif rect.left >= tile_rect.right:
+          if rect.left >= tile_rect.right:
             x_changed = True
             new_left = tile_rect.right+offsetx
             self.set_left(new_left)
@@ -191,6 +186,15 @@ class Player(entity.Entity):
             self.set_left(new_left)
             if self.vel_x > 0:
               self.vel_x = 0
+          elif rect.bottom <= tile_rect.top:
+            newy = tile_rect.top-1
+            grounded = True
+            if self.vel_y < 0:
+              self.vel_y = 0
+          elif rect.top >= tile_rect.bottom:
+            newy = tile_rect.bottom + rect.height
+            if self.vel_y > 0:
+              self.vel_y = 0
     self.grounded = grounded
     if x_changed:
       self.pos[1] = newy
