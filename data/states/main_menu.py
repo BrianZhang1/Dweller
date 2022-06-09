@@ -2,12 +2,13 @@ import pygame
 
 # main menu screen
 class Main_Menu:
-  def __init__(self, parent, resources, load_game, load_difficulty_change):
+  def __init__(self, parent, resources, load_game, load_difficulty_change, load_map_creator):
     
     self.parent = parent
     self.resources = resources
     self.load_game = load_game
     self.load_difficulty_change = load_difficulty_change
+    self.load_map_creator = load_map_creator
 
     self.screen_size = (parent.get_width(), parent.get_height())
     
@@ -56,7 +57,7 @@ class Main_Menu:
             self.load_game()
 
           elif self.difficulty_hitbox.collidepoint(event.pos):
-            self.load_difficulty_change()
+            self.load_map_creator()
             
 
             

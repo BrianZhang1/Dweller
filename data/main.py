@@ -5,7 +5,7 @@ import pygame
 pygame.init()
 
 from . import resource_handler
-from .states import game, main_menu, difficulty_change
+from .states import game, main_menu, difficulty_change, map_creator
 
 
 # called by start.py to start the program
@@ -32,7 +32,8 @@ class Control():
     self.root = pygame.display.set_mode(screen_size)
     self.clock = pygame.time.Clock()
 
-    self.load_main_menu()  # initially start on main menu
+    self.load_main_menu()
+    #self.load_map_creator()  # initially start on main menu
     
     # starts game loop
     self.main()
@@ -53,7 +54,7 @@ class Control():
   # loads main menu screen
   def load_main_menu(self, difficulty=None, score=None):
     self.state = "main_menu"
-    self.state_object = main_menu.Main_Menu(self.root, self.resources, self.load_game, self.load_difficulty_change)
+    self.state_object = main_menu.Main_Menu(self.root, self.resources, self.load_game, self.load_difficulty_change, self.load_map_creator)
     
     if difficulty:
       self.difficulty = difficulty
@@ -78,4 +79,9 @@ class Control():
   def load_difficulty_change(self):
     self.state = "difficulty_change"
     self.state_object = difficulty_change.Difficulty_Change(self.root, self.resources, self.load_main_menu, self.difficulty)
+  
+
+  def load_map_creator(self):
+    self.state = "map_creator"
+    self.state_object = map_creator.Map_Creator(self.root, self.resources)
 
