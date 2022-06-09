@@ -60,6 +60,7 @@ class Player(entity.Entity):
   # override entity.jump so player can double jump
   def jump(self):
     if self.jump_count <= self.jump_ability:
+      self.grounded = False
       self.vel_y = self.jump_power
       self.jump_count += 1
       self.change_state("jump")
@@ -83,7 +84,7 @@ class Player(entity.Entity):
       self.end_game()
 
 
-  # gets rect of the actual player
+  # gets rect of the actual player rather than entire sprite (sprite is a huge rectangle)
   def get_rect(self, offsetx, bottomleft=None):
     # default bottomleft is self.pos
     if bottomleft == None:
@@ -142,62 +143,20 @@ class Player(entity.Entity):
       self.pos[0] = posx - 62
 
 
-  def set_bottom(self, bottom):
-    self.pos[1] = bottom
-
-
   def set_left(self, left):
     if self.direction:
       self.pos[0] = left-14
     else:
       self.pos[0] = left-45
+  
+
+  # override handle attack so player can attack and move at the same time
+  def handle_attack(self):
+    super().handle_attack()
+    self.move()
     
 
 
-  # FIX WALL CLIMBING
-  def update_pos(self, offsetx):
-    newx = self.pos[0] + self.vel_x
-    newy = self.pos[1] - self.vel_y
-    new_bottomleft = (newx, newy)
-    rect = self.get_rect(offsetx)
-    new_rect = self.get_rect(offsetx, new_bottomleft)
-    grounded = False
-    x_changed = False
 
-    tiles = self.get_nearby_tiles(self.get_center(), 3)
-    tile_size = 32  # CHANGE TO VARIABLE
-    for tile in tiles:
-      if tile.type == 1:
-        tile_rect = pg.Rect((tile.pos[0] - offsetx, tile.pos[1]), (tile_size, tile_size))
-        if rect.bottom == tile_rect.top-1 and rect.right > tile_rect.left and rect.left < tile_rect.right:
-          grounded = True
-          if self.vel_y < 0:
-            self.vel_y = 0
-        if new_rect.colliderect(tile_rect):
-          if rect.left >= tile_rect.right:
-            x_changed = True
-            new_left = tile_rect.right+offsetx
-            self.set_left(new_left)
-            if self.vel_x < 0:
-              self.vel_x = 0
-          elif rect.right <= tile_rect.left:
-            x_changed = True
-            new_left = tile_rect.left - rect.width + offsetx
-            self.set_left(new_left)
-            if self.vel_x > 0:
-              self.vel_x = 0
-          elif rect.bottom <= tile_rect.top:
-            newy = tile_rect.top-1
-            grounded = True
-            if self.vel_y < 0:
-              self.vel_y = 0
-          elif rect.top >= tile_rect.bottom:
-            newy = tile_rect.bottom + rect.height
-            if self.vel_y > 0:
-              self.vel_y = 0
-    self.grounded = grounded
-    if x_changed:
-      self.pos[1] = newy
-    else:
-      self.pos = [newx, newy]
+  
       

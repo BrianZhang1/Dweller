@@ -25,7 +25,7 @@ class Game:
 
         # change enemy spawn cooldown depending on game difficulty
         if self.difficulty == "easy":
-            self.enemy_cooldown = 5000
+            self.enemy_cooldown = 1000  # supposed to be 5000
         elif self.difficulty == "okay":
             self.enemy_cooldown = 4500
         elif self.difficulty == "hard":
@@ -45,6 +45,7 @@ class Game:
         self.ui = user_interface.User_Interface(self.parent, self.resources)
         self.player = player.Player(self.parent, self.resources, self.end_game, self.terrain_h.get_nearby_tiles)
         self.all_sprites.add(self.player)
+        self.generate_enemy_rand_side()
 
         #self.background_image = resources["background.png"]
         #self.floor = obstacle.Obstacle(0, 0)
@@ -63,7 +64,7 @@ class Game:
         if not self.game_over:
             self.player.update(self.cur_time, self.offsetx)
             self.check_bounds()
-            self.enemies.update(self.cur_time, self.player.get_centerx())
+            self.enemies.update(self.cur_time, self.offsetx, self.player.get_centerx())
             self.check_collision()
 
             #if self.cur_time - self.last_enemy > self.enemy_cooldown:
@@ -114,9 +115,10 @@ class Game:
         self.scroll()  # update screen offset
 
         self.terrain_h.draw(self.offsetx)
-        #self.parent.blit(self.background_image, (0-self.offsetx, 0))
 
         # update Rect position of all sprites to prepare to draw
+        for enemy in self.enemies.sprites():
+            pg.draw.rect(self.parent, "red", enemy.get_rect(self.offsetx))
         for sprite in self.all_sprites.sprites():
             sprite.update_rect(self.offsetx)
             sprite.healthbar.render()  # render healthbar of all sprites
@@ -189,11 +191,7 @@ class Game:
         self.player.grounded = grounded
 
     def generate_enemy_rand_side(self):
-        side = random.randint(0, 1)
-        if side:
-            pos = (self.parent.get_width(), 367)
-        else:
-            pos = (-100, 367)
+        pos = (400, 367)
         self.generate_enemy(pos)
 
     # spawn new enemy

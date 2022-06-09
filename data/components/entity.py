@@ -13,11 +13,13 @@ class Entity(pg.sprite.Sprite):
     
     self.parent = parent
     self.resources = resources
+    self.active_attack_frames = active_attack_frames
+    self.get_nearby_tiles = get_nearby_tiles # method to get tiles near this entity
+
     self.max_health = health
     self.health = health
     self.speed = speed
-    self.active_attack_frames = active_attack_frames
-    self.get_nearby_tiles = get_nearby_tiles # method to get tiles near this entity
+
 
     self.pos = list(init_pos)  # bottom left pos
 
@@ -76,17 +78,92 @@ class Entity(pg.sprite.Sprite):
 
 
   # updates position depending on velocity values
+  # also checks for collision with tiles
   def update_pos(self, offsetx):
-    self.pos[0] += self.vel_x
-    self.pos[1] -= self.vel_y
+    self.update_posy(offsetx)
+    self.update_posx(offsetx)
+
+
+  def update_posy(self, offsetx):
+    newy = self.pos[1] - self.vel_y
+    new_bottomleft = (self.pos[0], newy)
+    rect = self.get_rect(offsetx)  # rect of current pos of player
+    nrect = self.get_rect(offsetx, new_bottomleft)  # rect of new position of player
+    grounded = False
+    ychanged = False
+
+    tiles = self.get_nearby_tiles(self.get_center(), 3)
+    tile_size = 32  # CHANGE TO VARIABLE
+    for tile in tiles:
+      if tile.type == 1:
+        tile_rect = pg.Rect((tile.pos[0] - offsetx, tile.pos[1]), (tile_size, tile_size))
+        if nrect.colliderect(tile_rect):
+          if rect.bottom <= tile_rect.top:
+            ychanged = True
+            self.set_bottom(tile_rect.top)
+            grounded = True
+            if self.vel_y < 0:
+              self.vel_y = 0
+          elif rect.top >= tile_rect.bottom:
+            ychanged = True
+            self.set_bottom(tile_rect.bottom + rect.height)
+            if self.vel_y > 0:
+              self.vel_y = 0
+    self.grounded = grounded
+    if not ychanged:
+      self.pos[1] = newy
+
+
+
+  def update_posx(self, offsetx):
+    newx = self.pos[0] + self.vel_x
+    new_bottomleft = (newx, self.pos[1])
+    rect = self.get_rect(offsetx)  # rect of current pos of player
+    nrect = self.get_rect(offsetx, new_bottomleft)  # rect of new position of player
+    x_changed = False
+
+    tiles = self.get_nearby_tiles(self.get_center(), 3)
+    tile_size = 32  # CHANGE TO VARIABLE
+    for tile in tiles:
+      if tile.type == 1:
+        tile_rect = pg.Rect((tile.pos[0] - offsetx, tile.pos[1]), (tile_size, tile_size))
+        if nrect.colliderect(tile_rect):
+          if rect.left >= tile_rect.right:
+            x_changed = True
+            new_left = tile_rect.right+offsetx
+            self.set_left(new_left)
+            if self.vel_x < 0:
+              self.vel_x = 0
+          elif rect.right <= tile_rect.left:
+            x_changed = True
+            new_left = tile_rect.left - rect.width + offsetx
+            self.set_left(new_left)
+            if self.vel_x > 0:
+              self.vel_x = 0
+    if not x_changed:
+      self.pos = [newx, self.pos[1]]
   
 
 
-  def check_tile_collisions(self):
-    pass
+  # returns the rect of this entity
+  # usually overridden by subclasses
+  def get_rect(self):
+    return self.rect
   
 
+  # sets the left position of this entity
+  # usually overridden by subclasses
+  def set_left(self, left):
+    self.pos[0] = left
+  
 
+  # sets the bottom position of this entity
+  # usually overridden by subclasses
+  def set_bottom(self, bottom):
+    self.pos[1] = bottom
+
+
+  # updates the rectangle depending on self.pos
   def update_rect(self, offsetx):
     self.rect.bottom = self.pos[1]
     self.rect.left = self.pos[0] - offsetx
@@ -94,7 +171,6 @@ class Entity(pg.sprite.Sprite):
 
 
 
-    # WHERE IS IT CHANGING STATE TO FALL???
   # changes state of entity
   def change_state(self, new_state):
     self.unpause_animation()
@@ -162,14 +238,15 @@ class Entity(pg.sprite.Sprite):
 
 
   def jump(self):
-    if self.state == "idle" or self.state == "run":
-      self.vel_y = 14
-      self.change_state("jump")
+    self.grounded = False
+    self.vel_y = 14
+    self.change_state("jump")
 
 
 
   def begin_attack(self):
     self.change_state("attack")
+    self.vel_x = 0
     self.attack_sound_played = False
 
     # create hitbox for attack
@@ -209,6 +286,8 @@ class Entity(pg.sprite.Sprite):
 
   def handle_jump(self):
     self.move()
+    if self.grounded:
+      self.change_state("idle")
     if self.animation_step >= self.animation_ref["jump"][2]:
       self.change_state("fall")
 
@@ -223,7 +302,6 @@ class Entity(pg.sprite.Sprite):
 
   # handles when entity is in attack state
   def handle_attack(self):
-    self.move()
     if self.animation_step > self.animation_ref["attack"][2]:
       self.change_state("idle")
       
@@ -257,10 +335,9 @@ class Entity(pg.sprite.Sprite):
 
   # handle falling, gravity
   def handle_gravity(self):
-    if not self.grounded: 
-      self.vel_y -= 1
-      if self.state == "idle" or self.state == "run":
-        self.change_state("fall")
+    self.vel_y -= 1
+    if not self.grounded and (self.state == "idle" or self.state == "run"):
+      self.change_state("fall")
 
 
 

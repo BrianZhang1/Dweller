@@ -35,9 +35,9 @@ class Enemy(entity.Entity):
 
 
   # called once per tick
-  def update(self, cur_time, player_centerx):
+  def update(self, cur_time, offsetx, player_centerx):
     self.player_centerx = player_centerx
-    super().update(cur_time)
+    super().update(cur_time, offsetx)
 
 
   def handle_idle(self):
@@ -50,6 +50,39 @@ class Enemy(entity.Entity):
       self.begin_attack()
     else:
       self.move_to_player(distance)
+  
+
+
+  # gets rect of the actual enemy rather than entire sprite (sprite is a huge rectangle)
+  def get_rect(self, offsetx, bottomleft=None):
+    # default bottomleft is self.pos
+    if bottomleft == None:
+      bottomleft = self.pos.copy()
+    
+    # change bottomleft to screen-relative position rather than absolute position
+    bottomleft = (bottomleft[0]-offsetx, bottomleft[1])
+
+    rect_bottomleft = (bottomleft[0]+41, bottomleft[1]-4) # (x, y)
+    rect_size = (26, 53)
+    rect = pg.Rect((0, 0), rect_size)
+    rect.bottomleft = rect_bottomleft
+      
+
+    return rect
+  
+
+
+  def get_center(self):
+    return (self.pos[0]+54, self.pos[1]-34)
+  
+
+  def set_left(self, left):
+    self.pos[0] = left-41
+
+
+  def set_bottom(self, bottom):
+    self.pos[1] = bottom+4
+
 
 
 
