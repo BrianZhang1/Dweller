@@ -1,3 +1,3 @@
-from data.main import start
+from src.main import start
 
 start()

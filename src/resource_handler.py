@@ -1,5 +1,4 @@
 # This program simply loads all images/sound as pygame objects and returns them as a dictionary for use in the program.
-# It also loads and verifies the maps from maps.json
 
 
 import os, pygame
