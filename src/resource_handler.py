@@ -3,25 +3,25 @@
 
 import os, pygame
 
-PATH_TO_RESOURCES = "assets"
+PATH_TO_RESOURCES = "resources"
 
 # normally assets are loaded directly into the resources dictionary
 # each exception is a directory
 # each file in the directory are instead loaded into their own lists in the resources dictionary
 # the key is the directory path and the value is the name of the list that will hold the directory's assets
 exceptions = {
-  "assets/images/golem/Idle": "golem_idle",
-  "assets/images/golem/Hurt": "golem_hurt",
-  "assets/images/golem/Walking": "golem_walk",
-  "assets/images/golem/Dying": "golem_death",
-  "assets/images/golem/Attacking": "golem_attack",
-  "assets/images/woodcutter/Idle": "woodcutter_idle",
-  "assets/images/woodcutter/Run": "woodcutter_run",
-  "assets/images/woodcutter/Attack": "woodcutter_attack",
-  "assets/images/woodcutter/Hurt": "woodcutter_hurt",
-  "assets/images/woodcutter/Death": "woodcutter_death",
-  "assets/images/woodcutter/Jump": "woodcutter_jump",
-  "assets/images/woodcutter/Fall": "woodcutter_fall"
+  "resources/images/golem/Idle": "golem_idle",
+  "resources/images/golem/Hurt": "golem_hurt",
+  "resources/images/golem/Walking": "golem_walk",
+  "resources/images/golem/Dying": "golem_death",
+  "resources/images/golem/Attacking": "golem_attack",
+  "resources/images/woodcutter/Idle": "woodcutter_idle",
+  "resources/images/woodcutter/Run": "woodcutter_run",
+  "resources/images/woodcutter/Attack": "woodcutter_attack",
+  "resources/images/woodcutter/Hurt": "woodcutter_hurt",
+  "resources/images/woodcutter/Death": "woodcutter_death",
+  "resources/images/woodcutter/Jump": "woodcutter_jump",
+  "resources/images/woodcutter/Fall": "woodcutter_fall"
 }
 
 # normalize all paths for cross-compatibility
