@@ -1,9 +1,12 @@
 import pygame as pg
+from ..components import terrain
 
 class Map_Creator:
     def __init__(self, parent, resources):
         self.parent = parent
         self.resources = resources
+
+        self.terrainh = terrain.Terrain_Handler(self.parent, resources)
     
 
     def update(self):
@@ -19,3 +22,4 @@ class Map_Creator:
 
     def draw(self):
         self.parent.fill("black")
+        self.terrainh.draw(-100)

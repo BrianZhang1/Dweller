@@ -18,7 +18,7 @@ class Terrain_Handler:
 
         self.bg_w = self.bg_num * self.bg_img.get_width() # total width of background
 
-        self.map = map.Map(self.resources, self.tile_size)
+        self.map = map.Map(self.parent, self.resources, self.tile_size)
         if tilemap:
             self.map.load_tilemap(tilemap)
         else:
@@ -51,7 +51,7 @@ class Terrain_Handler:
 
     def draw(self, offsetx):
         self.draw_background(offsetx)
-        self.draw_tiles(offsetx)
+        self.map.draw(offsetx)
 
 
     def draw_background(self, offsetx):
@@ -60,11 +60,9 @@ class Terrain_Handler:
             self.parent.blit(self.bg_img, (posx, 0))
 
     
-    # draw the tilemap onto the screen
-    def draw_tiles(self, offsetx):
-        for col in self.map.tilemap:
-            for tile in col:
-                tile.draw(self.parent, offsetx)
+    # gets the index of the tile that pos is on
+    def get_tile(self, pos):
+        return int(pos[0]/self.tile_size), int(pos[1]/self.tile_size) # index of closest tile to pos
     
 
     # returns a list of all nearby tiles
@@ -72,7 +70,7 @@ class Terrain_Handler:
     # radius is how many tiles the search should be
     def get_nearby_tiles(self, pos, radius=2):
         nearby_tiles = []
-        tile_index = (int(pos[0]/self.tile_size), int(pos[1]/self.tile_size)) # index of closest tile to pos
+        tile_index = self.get_tile(pos)
         # next, search around the tile
         t = (tile_index[0]-radius+1, tile_index[1]-radius+1) # top left tile in search radius
         for i in range(2*radius-1):

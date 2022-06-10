@@ -1,5 +1,6 @@
 class Map:
-    def __init__(self, resources, tile_size, tilemap=None):
+    def __init__(self, parent, resources, tile_size, tilemap=None):
+        self.parent = parent
         self.resources = resources
         self.tile_size = tile_size
         self.tilemap = None
@@ -48,6 +49,12 @@ class Map:
             pos[1] = topleft[1]
             pos[0] += int(self.tile_size)
         self.tilemap = new_tilemap
+
+    # draw the tilemap onto the screen
+    def draw(self, offsetx):
+        for col in self.tilemap:
+            for tile in col:
+                tile.draw(self.parent, offsetx)
 
 
 

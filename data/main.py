@@ -32,8 +32,7 @@ class Control():
     self.root = pygame.display.set_mode(screen_size)
     self.clock = pygame.time.Clock()
 
-    self.load_main_menu()
-    #self.load_map_creator()  # initially start on main menu
+    self.load_main_menu() # initally start on main menu
     
     # starts game loop
     self.main()
