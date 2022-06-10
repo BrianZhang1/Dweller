@@ -4,7 +4,7 @@
 import pygame
 pygame.init()
 
-from . import resource_handler
+from . import resource_handler, data_handler
 from .states import game, main_menu, difficulty_change, map_creator
 
 
@@ -17,8 +17,9 @@ def start():
 class Control():
   def __init__(self):
     
-    # Load resources
+    # Load resources and data
     self.resources = resource_handler.load_resources()
+    self.data = data_handler.load_data()
     
     # Variables
     screen_size = (600, 400)
