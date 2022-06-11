@@ -5,9 +5,7 @@ from ..components import user_interface, player, enemy, terrain
 
 # Controls the game screen
 class Game:
-    def __init__(self, parent, resources, start_new_game, load_main_menu, high_score, difficulty):
-        self.cur_tile_rect = None
-
+    def __init__(self, parent, resources, start_new_game, load_main_menu, high_score, difficulty, tile_size, map):
         self.parent = parent
         self.resources = resources
         self.start_new_game = start_new_game
@@ -34,7 +32,7 @@ class Game:
             print("invalid difficulty")
 
         # create terrain handler
-        self.terrain_h = terrain.Terrain_Handler(self.parent, self.resources)
+        self.terrain_h = terrain.Terrain_Handler(self.parent, self.resources, tile_size, map["tilemap"], map["width"])
 
         # create sprite groups
         self.all_sprites = pg.sprite.Group()

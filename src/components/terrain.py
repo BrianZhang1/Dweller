@@ -6,45 +6,20 @@ from ..components import map
 
 # This class handles Terrain loading and generation, as well as background rendering.
 class Terrain_Handler:
-    def __init__(self, parent, resources, tilemap=None):
+    def __init__(self, parent, resources, tile_size, tilemap, width):
         self.parent = parent
         self.resources = resources
+        self.tile_size = tile_size
 
         self.bg_img = self.resources["bg.png"]
 
         # Constants
-        self.bg_num = 2  # how many backgrounds will be in the map
-        self.tile_size = 32 # length of a single tile
+        self.bg_num = width  # how many backgrounds will be in the map
 
         self.bg_w = self.bg_num * self.bg_img.get_width() # total width of background
 
         self.map = map.Map(self.parent, self.resources, self.tile_size)
-        if tilemap:
-            self.map.load_tilemap(tilemap)
-        else:
-            # 0 = empty space
-            # 1 = block
-            screen = pg.display.get_surface()
-            cols = int(self.bg_w/self.tile_size) + 1
-            rows = int(screen.get_height()/self.tile_size) + 1
-            sample_tilemap = []
-
-            for i in range(cols):
-                col = []
-                for k in range(rows):
-                    if k == rows-1:
-                        col.append(1)
-                    elif i == 1 and k == rows-4:
-                        col.append(1)
-                    elif (k == rows-4 or k == rows-3 or k == rows-2) and i in [6, 7, 8]:
-                        col.append(1)
-                    elif k == rows-5 and i in [12, 13, 14, 15]:
-                        col.append(1)
-                    else:
-                        col.append(0)
-                sample_tilemap.append(col)
-            
-            self.map.load_tilemap(sample_tilemap)
+        self.map.load_tilemap(tilemap)
 
 
 

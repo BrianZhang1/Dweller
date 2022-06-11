@@ -8,18 +8,24 @@ from . import resource_handler, data_handler
 from .states import game, main_menu, difficulty_change, map_creator
 
 
+
 # called by start.py to start the program
 def start():
-  Control()
+  # Constants
+  constants = {
+    "TILE_SIZE": 32
+  }
+  Control(constants)
   
 
 # This class controls the entire program.
-class Control():
-  def __init__(self):
+class Control:
+  def __init__(self, constants):
+    self.constants = constants
     
     # Load resources and data
     self.resources = resource_handler.load_resources()
-    self.data = data_handler.load_data()
+    self.data = data_handler.load_data(bg_size=(self.resources["bg.png"].get_size()), tile_size=self.constants["TILE_SIZE"])
     
     # Variables
     screen_size = (600, 400)
@@ -28,7 +34,8 @@ class Control():
     self.high_score = 0
     self.difficulty = "easy"
     # difficulty = easy | okay | hard
-    
+
+
     # Initialize PyGame Variables
     self.root = pygame.display.set_mode(screen_size)
     self.clock = pygame.time.Clock()
@@ -72,7 +79,7 @@ class Control():
         self.high_score = score
         
     self.state = "game"
-    self.state_object = game.Game(self.root, self.resources, self.load_game, self.load_main_menu, self.high_score, self.difficulty)
+    self.state_object = game.Game(self.root, self.resources, self.load_game, self.load_main_menu, self.high_score, self.difficulty, self.constants["TILE_SIZE"], self.data["maps"][1])
 
 
   # loads difficulty selection screen
