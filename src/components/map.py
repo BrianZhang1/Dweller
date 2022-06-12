@@ -26,26 +26,8 @@ class Map:
                     tile_type = 0
                 else:
                     tile_type = 1
-                # False = empty, True = filled
-                # e.g., top = False means there is no tile above this tile
-                top = False
-                right = False
-                bottom = False
-                left = False
-                if i != 0:
-                    if tilemap[i-1][k] != 0:
-                        left = True
-                if i != len(tilemap)-1:
-                    if tilemap[i+1][k] != 0:
-                        right = True
-                if k != 0:
-                    if tilemap[i][k-1] != 0:
-                        top = True
-                if k != len(tilemap[i])-1:
-                    if tilemap[i][k+1] != 0:
-                        bottom = True
                 tile = Tile(self.resources, type=tile_type, list_pos=(i, k), pos=(pos[0], pos[1]))
-                tile.load_image(top, right, bottom, left)
+                tile.load_image(tilemap, init=True)
                 col.append(tile)
                 pos[1] += self.tile_size
             new_tilemap.append(col)
@@ -77,30 +59,80 @@ class Tile:
 
 
     # loads image for the tile depending on the tiles surrounding it
-    def load_image(self, top, right, bottom, left):
-        if self.type != 0:
-            if top:
-                self.image = self.resources["Tile_04.png"]
-            elif bottom:
-                if right:
-                    if left:
-                        self.image = self.resources["Tile_02.png"]
+    # init argument is for whether this is the initial loading of the image
+    def load_image(self, tilemap, init=False):
+        if self.type == 0:
+            self.image = None
+        
+        else:
+            surrounding_tiles = self.check_surrounding_tiles(tilemap, not init)
+            top = surrounding_tiles[0]
+            right = surrounding_tiles[1]
+            bottom = surrounding_tiles[2]
+            left = surrounding_tiles[3]
+            if self.type == 1:
+                if top:
+                    self.image = self.resources["Tile_04.png"]
+                elif bottom:
+                    if right:
+                        if left:
+                            self.image = self.resources["Tile_02.png"]
+                        else:
+                            self.image = self.resources["Tile_01.png"]
                     else:
-                        self.image = self.resources["Tile_01.png"]
-                else:
+                        if left:
+                            self.image = self.resources["Tile_03.png"]
+                        else:
+                            self.image = self.resources["Tile_05.png"]
+                elif right:
                     if left:
-                        self.image = self.resources["Tile_03.png"]
+                        self.image = self.resources["Tile_07.png"]
                     else:
-                        self.image = self.resources["Tile_05.png"]
-            elif right:
-                if left:
-                    self.image = self.resources["Tile_07.png"]
+                        self.image = self.resources["Tile_06.png"]
+                elif left:
+                    self.image = self.resources["Tile_08.png"]
                 else:
-                    self.image = self.resources["Tile_06.png"]
-            elif left:
-                self.image = self.resources["Tile_08.png"]
-            else:
-                self.image = self.resources["Tile_18.png"]
+                    self.image = self.resources["Tile_18.png"]
+
+
+    # checks whether tiles surrounding this tile are non-empty using given tilemap
+    def check_surrounding_tiles(self, tilemap, tiles_are_objects):
+        # False = empty, True = filled
+        # e.g., top = False means there is no tile above this tile
+        top = False
+        right = False
+        bottom = False
+        left = False
+        i = self.list_pos[0]
+        k = self.list_pos[1]
+        if tiles_are_objects:
+            if i != 0:
+                if tilemap[i-1][k].type != 0:
+                    left = True
+            if i != len(tilemap)-1:
+                if tilemap[i+1][k].type != 0:
+                    right = True
+            if k != 0:
+                if tilemap[i][k-1].type != 0:
+                    top = True
+            if k != len(tilemap[i])-1:
+                if tilemap[i][k+1].type != 0:
+                    bottom = True
+        else:
+            if i != 0:
+                if tilemap[i-1][k] != 0:
+                    left = True
+            if i != len(tilemap)-1:
+                if tilemap[i+1][k] != 0:
+                    right = True
+            if k != 0:
+                if tilemap[i][k-1] != 0:
+                    top = True
+            if k != len(tilemap[i])-1:
+                if tilemap[i][k+1] != 0:
+                    bottom = True
+
+        return (top, right, bottom, left)
     
 
     # draws this tile
