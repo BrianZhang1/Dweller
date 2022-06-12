@@ -1,5 +1,4 @@
 import json
-from random import sample
 
 DATA_PATH = "data.json"
 

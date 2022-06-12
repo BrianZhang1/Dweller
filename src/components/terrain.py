@@ -37,7 +37,12 @@ class Terrain_Handler:
     
     # gets the index of the tile that pos is on
     def get_tile(self, pos):
-        return int(pos[0]/self.tile_size), int(pos[1]/self.tile_size) # index of closest tile to pos
+        try:
+            tile = self.map.tilemap[int(pos[0]/self.tile_size)][int(pos[1]/self.tile_size)] # index of closest tile to pos
+        except IndexError:
+            print("Tile out of tilemap range.")
+            tile = None
+        return tile
     
 
     # returns a list of all nearby tiles
@@ -45,7 +50,7 @@ class Terrain_Handler:
     # radius is how many tiles the search should be
     def get_nearby_tiles(self, pos, radius=2):
         nearby_tiles = []
-        tile_index = self.get_tile(pos)
+        tile_index = self.get_tile(pos).list_pos
         # next, search around the tile
         t = (tile_index[0]-radius+1, tile_index[1]-radius+1) # top left tile in search radius
         for i in range(2*radius-1):

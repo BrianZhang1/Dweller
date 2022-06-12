@@ -1,3 +1,5 @@
+import pygame as pg
+
 class Map:
     def __init__(self, parent, resources, tile_size, tilemap=None):
         self.parent = parent
@@ -21,34 +23,36 @@ class Map:
             for k in range(len(tilemap[i])):
                 # if the tile is empty, append an empty tile
                 if tilemap[i][k] == 0:
-                    col.append(Tile(self.resources, type=0, list_pos=None, pos=None))
+                    tile_type = 0
                 else:
-                    # False = empty, True = filled
-                    # e.g., top = False means there is no tile above this tile
-                    top = False
-                    right = False
-                    bottom = False
-                    left = False
-                    if i != 0:
-                        if tilemap[i-1][k] != 0:
-                            left = True
-                    if i != len(tilemap)-1:
-                        if tilemap[i+1][k] != 0:
-                            right = True
-                    if k != 0:
-                        if tilemap[i][k-1] != 0:
-                            top = True
-                    if k != len(tilemap[i])-1:
-                        if tilemap[i][k+1] != 0:
-                            bottom = True
-                    tile = Tile(self.resources, type=1, list_pos=(i, k), pos=(pos[0], pos[1]))
-                    tile.load_image(top, right, bottom, left)
-                    col.append(tile)
+                    tile_type = 1
+                # False = empty, True = filled
+                # e.g., top = False means there is no tile above this tile
+                top = False
+                right = False
+                bottom = False
+                left = False
+                if i != 0:
+                    if tilemap[i-1][k] != 0:
+                        left = True
+                if i != len(tilemap)-1:
+                    if tilemap[i+1][k] != 0:
+                        right = True
+                if k != 0:
+                    if tilemap[i][k-1] != 0:
+                        top = True
+                if k != len(tilemap[i])-1:
+                    if tilemap[i][k+1] != 0:
+                        bottom = True
+                tile = Tile(self.resources, type=tile_type, list_pos=(i, k), pos=(pos[0], pos[1]))
+                tile.load_image(top, right, bottom, left)
+                col.append(tile)
                 pos[1] += self.tile_size
             new_tilemap.append(col)
             pos[1] = topleft[1]
             pos[0] += int(self.tile_size)
         self.tilemap = new_tilemap
+
 
     # draw the tilemap onto the screen
     def draw(self, offsetx):
@@ -103,5 +107,12 @@ class Tile:
     def draw(self, parent, offsetx):
         if self.type != 0:
             pos = (self.pos[0]-offsetx, self.pos[1])
-            parent.blit(self.image, pos)
+            if self.type == 1:
+                parent.blit(self.image, pos)
+            elif self.type == 2:
+                rect = pg.Rect(pos, (32, 32))
+                pg.draw.rect(parent, "red", rect)
+            else:
+                print("Invalid tile type:", self.type)
+
 
