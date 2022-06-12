@@ -25,6 +25,11 @@ class Map_Creator:
         self.right_button.rect.right = screen_size[0]-arrow_button_xmargin
         self.buttons.append(self.right_button)
     
+        self.bpanel_bg_rect = pg.Rect(0, 0, 300, 60)
+        self.bpanel_bg_rect.centerx = screen_size[0]/2
+        self.bpanel_bg_color = (180, 180, 180)
+
+    
 
     def update(self):
         self.handle_events()
@@ -55,6 +60,7 @@ class Map_Creator:
         self.terrainh.draw(self.offsetx)
         for button in self.buttons:
             button.draw()
+        pg.draw.rect(self.parent, self.bpanel_bg_color, self.bpanel_bg_rect)
     
 
     def move_screen(self, amount):
