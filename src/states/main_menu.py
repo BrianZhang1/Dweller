@@ -1,4 +1,5 @@
 import pygame
+from ..components.button import Button
 
 # main menu screen
 class Main_Menu:
@@ -17,17 +18,18 @@ class Main_Menu:
 
     self.font = pygame.font.SysFont("Arial", 18)
     
+    self.buttons = []
     # position start button
-    start_button_x = self.screen_size[0]/2 - self.start_button_image.get_width()/2
-    start_button_y = 80
-    self.start_button_pos = (start_button_x, start_button_y)
-    self.start_hitbox = self.start_button_image.get_rect(topleft=self.start_button_pos)
+    self.start_button = Button(self.parent, self.resources["start_button.png"], (0, 0), self.load_game)
+    self.start_button.rect.centerx = self.screen_size[0]/2
+    self.start_button.rect.top = 80
+    self.buttons.append(self.start_button)
 
     # position change difficulty button
-    difficulty_x = self.screen_size[0]/2 - self.difficulty_button_image.get_width()/2
-    difficulty_y = start_button_y + self.start_button_image.get_height() + 30
-    self.difficulty_pos = (difficulty_x, difficulty_y)
-    self.difficulty_hitbox = self.difficulty_button_image.get_rect(topleft=self.difficulty_pos)
+    self.difficulty_button = Button(self.parent, self.resources["difficulty_button.png"], (0, 0), self.load_map_creator)
+    self.difficulty_button.rect.centerx = self.screen_size[0]/2
+    self.difficulty_button.rect.top = self.start_button.rect.bottom + 30
+    self.buttons.append(self.difficulty_button)
 
     # reminder to turn on sound text
     sound_reminder_content = "Turn on sound for the best experience!"
@@ -53,18 +55,14 @@ class Main_Menu:
         
       if event.type == pygame.MOUSEBUTTONDOWN:
         if event.button == 1:
-          if self.start_hitbox.collidepoint(event.pos):
-            self.load_game()
-
-          elif self.difficulty_hitbox.collidepoint(event.pos):
-            self.load_map_creator()
+          for button in self.buttons:
+            button.check_click(event.pos)
             
 
             
   # draws everything
   def render(self):
     self.parent.fill("burlywood1")
-    self.parent.blit(self.start_button_image, self.start_button_pos)
-    self.parent.blit(self.difficulty_button_image, self.difficulty_pos)
-    self.parent.blit(self.sound_reminder_text, self.sound_reminder_pos)
+    for button in self.buttons:
+      button.draw()
     
