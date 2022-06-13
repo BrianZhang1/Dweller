@@ -66,3 +66,21 @@ def create_default_data(bg_size, tile_size):
     data["maps"].append(samplemap)
 
     return data
+
+
+def save_map(name, map):
+    # transform map into list with tile types
+    new_tilemap = []
+    for col in map.tilemap:
+        new_col = []
+        for tile in col:
+            new_col.append(tile.type)
+        new_tilemap.append(new_col)
+    
+    map = {
+        "name": name,
+        "tilemap": new_tilemap,
+        "width": 1
+    }
+
+    # WRITE TO FILE

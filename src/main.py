@@ -90,5 +90,5 @@ class Control:
 
   def load_map_creator(self):
     self.state = "map_creator"
-    self.state_object = map_creator.Map_Creator(self.root, self.resources, self.constants["TILE_SIZE"], self.data["maps"][0])
+    self.state_object = map_creator.Map_Creator(self.root, self.resources, self.constants["TILE_SIZE"], self.data["maps"][0], data_handler.save_map)
 
