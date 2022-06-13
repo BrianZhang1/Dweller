@@ -5,7 +5,7 @@ import pygame
 pygame.init()
 
 from . import resource_handler, data_handler
-from .states import game, main_menu, difficulty_change, map_creator
+from .states import game, main_menu, difficulty_change, map_creator, map_selector
 
 
 
@@ -13,6 +13,7 @@ from .states import game, main_menu, difficulty_change, map_creator
 def start():
   # Constants
   constants = {
+    "SCREEN_SIZE": (600, 400),
     "TILE_SIZE": 32
   }
 
@@ -31,7 +32,6 @@ class Control:
       self.datah.create_default_data(bg_size=(self.resources["bg.png"].get_size()), tile_size=self.constants["TILE_SIZE"])
     
     # Variables
-    screen_size = (600, 400)
     self.state = None
     self.state_object = None
     self.high_score = 0
@@ -40,7 +40,7 @@ class Control:
 
 
     # Initialize PyGame Variables
-    self.root = pygame.display.set_mode(screen_size)
+    self.root = pygame.display.set_mode(self.constants["SCREEN_SIZE"])
     self.clock = pygame.time.Clock()
 
     self.load_main_menu() # initally start on main menu
@@ -64,7 +64,7 @@ class Control:
   # loads main menu screen
   def load_main_menu(self, difficulty=None, score=None):
     self.state = "main_menu"
-    self.state_object = main_menu.Main_Menu(self.root, self.resources, self.load_game, self.load_difficulty_change, self.load_map_creator)
+    self.state_object = main_menu.Main_Menu(self.root, self.resources, self.load_map_selector, self.load_difficulty_change, self.load_map_creator)
     
     if difficulty:
       self.difficulty = difficulty
@@ -76,13 +76,13 @@ class Control:
   
 
   # loads game screen
-  def load_game(self, score=None):
+  def load_game(self, map, score=None):
     if score:
       if score > self.high_score:
         self.high_score = score
         
     self.state = "game"
-    self.state_object = game.Game(self.root, self.resources, self.load_game, self.load_main_menu, self.high_score, self.difficulty, self.constants["TILE_SIZE"], self.datah.data["maps"][1])
+    self.state_object = game.Game(self.root, self.resources, self.load_game, self.load_main_menu, self.high_score, self.difficulty, self.constants["TILE_SIZE"], map)
 
 
   # loads difficulty selection screen
@@ -94,4 +94,9 @@ class Control:
   def load_map_creator(self):
     self.state = "map_creator"
     self.state_object = map_creator.Map_Creator(self.root, self.resources, self.constants["TILE_SIZE"], self.datah.data["maps"][0], self.datah.save_map, self.load_main_menu)
+
+
+  def load_map_selector(self):
+    self.state = "map_selector"
+    self.state_object = map_selector.MapSelector(self.root, self.resources, self.datah.data["maps"], self.load_main_menu, self.load_game)
 

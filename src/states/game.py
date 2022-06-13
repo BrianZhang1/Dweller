@@ -11,6 +11,7 @@ class Game:
         self.load_main_menu = load_main_menu
         self.high_score = high_score
         self.difficulty = difficulty
+        self.map = map
 
         # important variables
         self.cur_time = pg.time.get_ticks()
@@ -102,7 +103,7 @@ class Game:
                         click_target = self.ui.process_click(event.pos)
                         if click_target:
                             if click_target == "start_new_game":
-                                self.start_new_game(score=self.score)
+                                self.start_new_game(score=self.score, map=self.map)
                             elif click_target == "load_main_menu":
                                 self.load_main_menu(score=self.score)
 

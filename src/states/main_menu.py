@@ -3,11 +3,11 @@ from ..components.button import Button
 
 # main menu screen
 class Main_Menu:
-  def __init__(self, parent, resources, load_game, load_difficulty_change, load_map_creator):
+  def __init__(self, parent, resources, load_map_selector, load_difficulty_change, load_map_creator):
     
     self.parent = parent
     self.resources = resources
-    self.load_game = load_game
+    self.load_map_selector = load_map_selector
     self.load_difficulty_change = load_difficulty_change
     self.load_map_creator = load_map_creator
 
@@ -20,7 +20,7 @@ class Main_Menu:
     
     self.buttons = []
     # position start button
-    self.start_button = Button(self.parent, self.resources["start_button.png"], (0, 0), self.load_game)
+    self.start_button = Button(self.parent, self.resources["start_button.png"], (0, 0), self.load_map_selector)
     self.start_button.rect.centerx = self.screen_size[0]/2
     self.start_button.rect.top = 80
     self.buttons.append(self.start_button)
