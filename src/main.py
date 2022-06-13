@@ -15,6 +15,7 @@ def start():
   constants = {
     "TILE_SIZE": 32
   }
+
   Control(constants)
   
 
@@ -25,7 +26,9 @@ class Control:
     
     # Load resources and data
     self.resources = resource_handler.load_resources()
-    self.data = data_handler.load_data(bg_size=(self.resources["bg.png"].get_size()), tile_size=self.constants["TILE_SIZE"])
+    self.datah = data_handler.DataHandler()  # data handler (loading, writing, etc.)
+    if self.datah.load_data() == 1:  # load_data() returns 1 upon FileNotFoundError
+      self.datah.create_default_data(bg_size=(self.resources["bg.png"].get_size()), tile_size=self.constants["TILE_SIZE"])
     
     # Variables
     screen_size = (600, 400)
@@ -79,7 +82,7 @@ class Control:
         self.high_score = score
         
     self.state = "game"
-    self.state_object = game.Game(self.root, self.resources, self.load_game, self.load_main_menu, self.high_score, self.difficulty, self.constants["TILE_SIZE"], self.data["maps"][1])
+    self.state_object = game.Game(self.root, self.resources, self.load_game, self.load_main_menu, self.high_score, self.difficulty, self.constants["TILE_SIZE"], self.datah.data["maps"][1])
 
 
   # loads difficulty selection screen
@@ -90,5 +93,5 @@ class Control:
 
   def load_map_creator(self):
     self.state = "map_creator"
-    self.state_object = map_creator.Map_Creator(self.root, self.resources, self.constants["TILE_SIZE"], self.data["maps"][0], data_handler.save_map)
+    self.state_object = map_creator.Map_Creator(self.root, self.resources, self.constants["TILE_SIZE"], self.datah.data["maps"][0], self.datah.save_map, self.load_main_menu)
 

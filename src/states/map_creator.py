@@ -1,13 +1,15 @@
+from json import load
 import pygame as pg
 from ..components import terrain, button, textbox
 
 class Map_Creator:
-    def __init__(self, parent, resources, tile_size, default_map, save_map_callback):
+    def __init__(self, parent, resources, tile_size, default_map, save_map_callback, load_main_menu):
         self.parent = parent
         self.resources = resources
         self.tile_size = tile_size
         self.default_map = default_map
         self.save_map_callback = save_map_callback
+        self.load_main_menu = load_main_menu
 
         # core variables
         self.terrainh = terrain.Terrain_Handler(self.parent, resources, tile_size, default_map["tilemap"], 1)
@@ -140,4 +142,5 @@ class Map_Creator:
 
     # save the map
     def save_map(self):
-        self.save_map_callback(self.title_tb.content, self.terrainh.map)
+        self.save_map_callback(self.title_tb.content, self.terrainh.map, self.terrainh.bg_num)
+        self.load_main_menu()

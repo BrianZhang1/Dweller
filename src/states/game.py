@@ -1,4 +1,3 @@
-import random
 import pygame as pg
 from ..components import user_interface, player, enemy, terrain
 
