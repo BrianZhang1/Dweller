@@ -21,18 +21,18 @@ class Map:
         for i in range(len(tilemap)):
             col = []
             for k in range(len(tilemap[i])):
-                # if the tile is empty, append an empty tile
-                if tilemap[i][k] == 0:
-                    tile_type = 0
-                else:
-                    tile_type = 1
+                tile_type = tilemap[i][k]
                 tile = Tile(self.resources, type=tile_type, list_pos=(i, k), pos=(pos[0], pos[1]))
-                tile.load_image(tilemap, init=True)
                 col.append(tile)
                 pos[1] += self.tile_size
             new_tilemap.append(col)
             pos[1] = topleft[1]
             pos[0] += int(self.tile_size)
+
+        for col in new_tilemap:
+            for tile in col:
+                tile.load_image(new_tilemap)
+
         self.tilemap = new_tilemap
 
 
@@ -60,12 +60,12 @@ class Tile:
 
     # loads image for the tile depending on the tiles surrounding it
     # init argument is for whether this is the initial loading of the image
-    def load_image(self, tilemap, init=False):
+    def load_image(self, tilemap):
         if self.type == 0:
             self.image = None
         
-        else:
-            surrounding_tiles = self.check_surrounding_tiles(tilemap, not init)
+        elif self.type == 1:
+            surrounding_tiles = self.check_surrounding_tiles(tilemap)
             top = surrounding_tiles[0]
             right = surrounding_tiles[1]
             bottom = surrounding_tiles[2]
@@ -93,10 +93,13 @@ class Tile:
                     self.image = self.resources["Tile_08.png"]
                 else:
                     self.image = self.resources["Tile_18.png"]
+        
+        elif self.type == 2:
+            self.image = self.resources["enemy_tile.png"]
 
 
     # checks whether tiles surrounding this tile are non-empty using given tilemap
-    def check_surrounding_tiles(self, tilemap, tiles_are_objects):
+    def check_surrounding_tiles(self, tilemap):
         # False = empty, True = filled
         # e.g., top = False means there is no tile above this tile
         top = False
@@ -105,32 +108,18 @@ class Tile:
         left = False
         i = self.list_pos[0]
         k = self.list_pos[1]
-        if tiles_are_objects:
-            if i != 0:
-                if tilemap[i-1][k].type != 0:
-                    left = True
-            if i != len(tilemap)-1:
-                if tilemap[i+1][k].type != 0:
-                    right = True
-            if k != 0:
-                if tilemap[i][k-1].type != 0:
-                    top = True
-            if k != len(tilemap[i])-1:
-                if tilemap[i][k+1].type != 0:
-                    bottom = True
-        else:
-            if i != 0:
-                if tilemap[i-1][k] != 0:
-                    left = True
-            if i != len(tilemap)-1:
-                if tilemap[i+1][k] != 0:
-                    right = True
-            if k != 0:
-                if tilemap[i][k-1] != 0:
-                    top = True
-            if k != len(tilemap[i])-1:
-                if tilemap[i][k+1] != 0:
-                    bottom = True
+        if i != 0:
+            if tilemap[i-1][k].type == 1:
+                left = True
+        if i != len(tilemap)-1:
+            if tilemap[i+1][k].type == 1:
+                right = True
+        if k != 0:
+            if tilemap[i][k-1].type == 1:
+                top = True
+        if k != len(tilemap[i])-1:
+            if tilemap[i][k+1].type == 1:
+                bottom = True
 
         return (top, right, bottom, left)
     
@@ -139,12 +128,17 @@ class Tile:
     def draw(self, parent, offsetx):
         if self.type != 0:
             pos = (self.pos[0]-offsetx, self.pos[1])
-            if self.type == 1:
+            if self.type in [1, 2]:
                 parent.blit(self.image, pos)
-            elif self.type == 2:
-                rect = pg.Rect(pos, (32, 32))
-                pg.draw.rect(parent, "red", rect)
             else:
                 print("Invalid tile type:", self.type)
+    
 
+    # change the type of this tile
+    def change_type(self, new_type, tilemap):
+        if self.type != new_type:
+            self.type = new_type
+            self.load_image(tilemap)
+            return True  # true means the type was changed
+        return False # false means no change occured
 

@@ -13,9 +13,10 @@ class Map_Creator:
 
         # core variables
         self.terrainh = terrain.Terrain_Handler(self.parent, resources, tile_size, default_map["tilemap"], 1)
-        self.offsetx = 0
+        self.offsetx = 0  # for moving screen horizontally
         self.selected_tile_type = 1  # type of selected tile
         self.buttons = [] # list of all buttons
+        self.placing_tiles = False  # so user can click and drag to place multiple tiles
 
         # NAVIGATION BUTTONS -----------------------------------
         # buttons at side of screen to move screen
@@ -44,7 +45,7 @@ class Map_Creator:
         self.tpanel_bg_rect.centerx = screen_size[0]/2
         self.tpanel_bg_color = (180, 180, 180)
 
-        tile_images = [self.resources["remove.png"], self.resources["Tile_18.png"]]
+        tile_images = [self.resources["remove.png"], self.resources["Tile_18.png"], self.resources["enemy_tile.png"]]
         self.tpanel_tile_margin = 10
         self.tpanel_select_rect = pg.Rect(0, 0, len(tile_images)*(self.tpanel_tile_margin + tile_size), tile_size+20)
         self.tpanel_select_rect.center = self.tpanel_bg_rect.center
@@ -76,6 +77,7 @@ class Map_Creator:
 
     def update(self):
         self.handle_events()
+        self.check_place_tile()  # place a tile at mouse pos if self.placing_tiles is true
         self.draw()
 
 
@@ -92,17 +94,19 @@ class Map_Creator:
                             button_pressed = True
                             break
                     
+                    # if the click wasn't for a button then place tiles
                     if not button_pressed:
-                        tile = self.terrainh.get_tile((e.pos[0]+self.offsetx, e.pos[1]))
-                        if tile != None:
-                            tile.type = self.selected_tile_type
-                            for tile in self.terrainh.get_nearby_tiles(tile.pos, radius=2):
-                                tile.load_image(self.terrainh.map.tilemap)
+                        self.placing_tiles = True
+            
+            elif e.type == pg.MOUSEBUTTONUP:
+                self.placing_tiles = False
             
             elif e.type == pg.KEYDOWN:
                 if self.show_tb:
                     if e.key == pg.K_BACKSPACE:
                         self.title_tb.content = self.title_tb.content[:-1] # remove last character
+                    elif e.key == pg.K_ESCAPE:
+                        self.show_tb = False  # close textbox
                     elif e.key == pg.K_RETURN:
                         self.save_map()
                     else:
@@ -144,3 +148,14 @@ class Map_Creator:
     def save_map(self):
         self.save_map_callback(self.title_tb.content, self.terrainh.map, self.terrainh.bg_num)
         self.load_main_menu()
+    
+    # place a tile at mouse pos if self.placing_tiles is true
+    def check_place_tile(self):
+        if self.placing_tiles:
+            mouse_pos = pg.mouse.get_pos()
+            tile = self.terrainh.get_tile((mouse_pos[0]+self.offsetx, mouse_pos[1]))
+            if tile != None:
+                tile_changed = tile.change_type(self.selected_tile_type, self.terrainh.map.tilemap)
+                if tile_changed:  # if new tile, update surrounding tile images
+                    for tile in self.terrainh.get_nearby_tiles(tile.pos, radius=2):
+                        tile.load_image(self.terrainh.map.tilemap)

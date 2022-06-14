@@ -19,7 +19,6 @@ class Game:
         self.scroll_speed = 5  # speed the background scrolls
         self.score = 0
         self.game_over = False  # whether the game is over
-        self.last_enemy = pg.time.get_ticks()  # time of last enemy spawn
 
         # change enemy spawn cooldown depending on game difficulty
         if self.difficulty == "easy":
@@ -43,7 +42,7 @@ class Game:
         self.ui = user_interface.User_Interface(self.parent, self.resources)
         self.player = player.Player(self.parent, self.resources, self.end_game, self.terrain_h.get_nearby_tiles)
         self.all_sprites.add(self.player)
-        self.generate_enemy_rand_side()
+        self.generate_map_enemies()  # generate an enemy for every enemy tile in map
 
         #self.background_image = resources["background.png"]
         #self.floor = obstacle.Obstacle(0, 0)
@@ -64,9 +63,6 @@ class Game:
             self.check_bounds()
             self.enemies.update(self.cur_time, self.offsetx, self.player.get_centerx())
             self.check_collision()
-
-            #if self.cur_time - self.last_enemy > self.enemy_cooldown:
-            #  self.generate_enemy_rand_side()
 
         # blits everything on parent surface
         self.draw()
@@ -115,11 +111,10 @@ class Game:
         self.terrain_h.draw(self.offsetx)
 
         # update Rect position of all sprites to prepare to draw
-        for enemy in self.enemies.sprites():
-            pg.draw.rect(self.parent, "red", enemy.get_rect(self.offsetx))
         for sprite in self.all_sprites.sprites():
             sprite.update_rect(self.offsetx)
             sprite.healthbar.render()  # render healthbar of all sprites
+        # draw all sprites
         self.all_sprites.draw(
             self.parent)  # use pygame built-in draw function for sprite groups
 
@@ -162,7 +157,6 @@ class Game:
         for tile in nearby_tiles:
             if tile.type == 1:
                 tile_rect = pg.Rect((tile.pos[0] - self.offsetx, tile.pos[1]), (tile_size, tile_size))
-                # FIX SNAPPING AND MAKE COMPATIBLE WITH ENEMY
 
                 if rect.colliderect(tile_rect):
                     # if top of tile is between the bottom and center of the player, move the player to the top of the tile
@@ -188,13 +182,18 @@ class Game:
                             self.player.vel_x = 0
         self.player.grounded = grounded
 
-    def generate_enemy_rand_side(self):
-        pos = (400, 367)
-        self.generate_enemy(pos)
+
+    # generates an enemy for every enemy tile in the map
+    def generate_map_enemies(self):
+        for col in self.terrain_h.map.tilemap:
+            for tile in col:
+                if tile.type == 2:  # 2 is the type for enemy tile
+                    self.generate_enemy(tile.pos)
+                    tile.change_type(0, self.terrain_h.map.tilemap)
+
 
     # spawn new enemy
     def generate_enemy(self, pos):
-        self.last_enemy = self.cur_time
         enemy_obj = enemy.Enemy(self.parent, self.resources, pos, self.handle_enemy_death, self.difficulty, self.terrain_h.get_nearby_tiles)
         self.all_sprites.add(self.player, enemy_obj)
         self.enemies.add(enemy_obj)
