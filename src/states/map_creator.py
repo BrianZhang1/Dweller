@@ -3,16 +3,15 @@ import pygame as pg
 from ..components import terrain, button, textbox
 
 class Map_Creator:
-    def __init__(self, parent, resources, tile_size, default_map, save_map_callback, load_main_menu):
+    def __init__(self, parent, resources, tile_size, save_map_callback, load_main_menu):
         self.parent = parent
         self.resources = resources
         self.tile_size = tile_size
-        self.default_map = default_map
         self.save_map_callback = save_map_callback
         self.load_main_menu = load_main_menu
 
         # core variables
-        self.terrainh = terrain.Terrain_Handler(self.parent, resources, tile_size, default_map["tilemap"], 1)
+        self.load_plain_map(1)  # loads the initial map
         self.offsetx = 0  # for moving screen horizontally
         self.selected_tile_type = 1  # type of selected tile
         self.buttons = [] # list of all buttons
@@ -62,7 +61,7 @@ class Map_Creator:
 
         # SAVE BUTTON ------------------------------
         save_button_margin = 10
-        self.save_button = button.Button(self.parent, self.resources["save_button.png"], (0, 0), self.show_tb)
+        self.save_button = button.Button(self.parent, self.resources["save_button.png"], (0, 0), self.toggle_tb)
         self.save_button.rect.right = screen_size[0]-save_button_margin
         self.save_button.rect.bottom = screen_size[1]-save_button_margin
         self.buttons.append(self.save_button)
@@ -72,6 +71,28 @@ class Map_Creator:
         self.title_tb = textbox.Textbox(self.parent, (300, 60))
         self.title_tb.rect.center = (screen_size[0]/2, screen_size[1]/2)
         self.title_tb.update_tb_pos()
+
+        # SETTINGS BUTTON
+        self.show_settings = False
+        self.settings_button = button.Button(self.parent, self.resources["settings_gear.png"], (0, 0), self.toggle_settings)
+        self.settings_button.rect.top = 10
+        self.settings_button.rect.right = screen_size[0]-10
+        self.buttons.append(self.settings_button)
+
+        # SETTINGS PANEL
+        self.settings_panel = pg.Rect(0, 0, 100, 100)
+        self.settings_panel.top = self.settings_button.rect.bottom + 10
+        self.settings_panel.right = screen_size[0] - 10
+
+        # SETTINGS PANEL SET WIDTH
+        self.increase_width_button = button.Button(self.parent, self.resources["arrow_up.png"], (0, 0), lambda: self.load_plain_map(self.terrainh.bg_num+1))
+        self.increase_width_button.rect.top = self.settings_panel.top + 5
+        self.increase_width_button.rect.left = self.settings_panel.left + 5
+        self.buttons.append(self.increase_width_button)
+        self.decrease_width_button = button.Button(self.parent, self.resources["arrow_down.png"], (0, 0), lambda: self.load_plain_map(self.terrainh.bg_num-1))
+        self.decrease_width_button.rect.top = self.increase_width_button.rect.bottom + 5
+        self.decrease_width_button.rect.left = self.settings_panel.left + 5
+        self.buttons.append(self.decrease_width_button)
 
     
 
@@ -111,25 +132,37 @@ class Map_Creator:
                         self.save_map()
                     else:
                         self.title_tb.content += e.unicode
+                else:
+                    if e.key == pg.K_a:
+                        self.move_screen(-100)
+                    elif e.key == pg.K_d:
+                        self.move_screen(100)
 
     
 
     def draw(self):
         self.parent.fill("black")
         self.terrainh.draw(self.offsetx)
-        for button in self.nav_buttons:
-            button.draw()
-        self.draw_tpanel()
-        self.save_button.draw()
-        if self.show_tb:
-            self.title_tb.draw()
-
-
-    def draw_tpanel(self):
+        
+        # draw tile panel
         pg.draw.rect(self.parent, self.tpanel_bg_color, self.tpanel_bg_rect)
         pg.draw.rect(self.parent, self.tpanel_select_color, self.tpanel_select_rect)
         for button in self.tpanel_buttons:
             button.draw()
+
+        # draw buttons
+        self.save_button.draw()
+        self.settings_button.draw()
+        for button in self.nav_buttons:
+            button.draw()
+
+        # show optional menus
+        if self.show_tb:
+            self.title_tb.draw()
+        if self.show_settings:
+            pg.draw.rect(self.parent, (160, 160, 160), self.settings_panel)
+            self.increase_width_button.draw()
+            self.decrease_width_button.draw()
         
     
     def move_screen(self, amount):
@@ -139,9 +172,21 @@ class Map_Creator:
     def set_selected_tile_type(self, new_tile):
         self.selected_tile_type = new_tile
     
+    # title textbox for titling map
+    def toggle_tb(self):
+        if self.show_tb:
+            self.show_tb = False
+            self.save_button.image = self.resources["save_button.png"]
+        else:
+            self.show_tb = True 
+            self.save_button.image = self.resources["close_save.png"]
+    
 
-    def show_tb(self):
-        self.show_tb = True  # make textbox for titling map appear
+    def toggle_settings(self):
+        if self.show_settings:
+            self.show_settings = False
+        else:
+            self.show_settings = True
     
 
     # save the map
@@ -159,3 +204,24 @@ class Map_Creator:
                 if tile_changed:  # if new tile, update surrounding tile images
                     for tile in self.terrainh.get_nearby_tiles(tile.pos, radius=2):
                         tile.load_image(self.terrainh.map.tilemap)
+    
+
+    # generates a plain map with just a floor, given width
+    # width is how many backgrounds wide the map is
+    def load_plain_map(self, width):
+        bg_width = self.resources["bg.png"].get_width()
+        bg_height = self.resources["bg.png"].get_height()
+        cols = int(bg_width*width/self.tile_size) + 1
+        rows = int(bg_height/self.tile_size) + 1
+        tilemap = []
+        for i in range(cols):
+            col = []
+            for k in range(rows):
+                if k == rows-1:
+                    col.append(1)
+                else:
+                    col.append(0)
+            tilemap.append(col)
+        
+        self.terrainh = terrain.Terrain_Handler(self.parent, self.resources, self.tile_size, tilemap, width)
+
