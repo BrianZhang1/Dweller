@@ -1,3 +1,4 @@
+from turtle import up
 import pygame as pg
 
 
@@ -56,3 +57,58 @@ class Textbox:
 
     def update_tb_pos(self):
         self.entry_rect.center = self.rect.center
+
+
+# has up and down arrow buttons that can increment or decrement a value
+# position_components() method must be called after positioning this widget
+class Incrementer:
+    def __init__(self, parent, resources, buttons, title, callback, init_value):
+        self.parent = parent
+        self.resources = resources
+        self.title = title
+        self.callback = callback
+        
+        self.title_font = pg.font.SysFont("Arial", 15)
+        self.value_font = pg.font.SysFont("Arial", 12)
+        self.margin = 5  # pixel margin separating the components of this widget
+        self.value = init_value  # value of this widget
+
+        self.title_text = self.title_font.render(str(title), True, "black")
+        self.increase_width_button = Button(self.parent, self.resources["arrow_up.png"], (0, 0), lambda: self.callback(1))
+        self.value_text = self.value_font.render(str(self.value), True, "black")
+        self.decrease_width_button = Button(self.parent, self.resources["arrow_down.png"], (0, 0), lambda: self.callback(-1))
+        buttons.append(self.increase_width_button)
+        buttons.append(self.decrease_width_button)
+
+        rect_width = max(self.title_text.get_width(), self.increase_width_button.rect.height, self.value_text.get_width(), self.decrease_width_button.rect.height)
+        rect_width += 2*self.margin
+        rect_height = self.title_text.get_height() + self.increase_width_button.rect.height + self.value_text.get_height() + self.decrease_width_button.rect.height + self.margin*5
+        self.rect = pg.Rect(0, 0, rect_width, rect_height)
+
+    
+    # positions the rect of all components after self.rect is set
+    def position_components(self):
+        title_pos = (self.rect.left + 5, self.rect.top + 5)
+        self.title_rect = self.title_text.get_rect(topleft=title_pos)
+
+        self.increase_width_button.rect.centerx = self.title_rect.centerx
+        self.increase_width_button.rect.top = self.title_rect.bottom + 5
+
+        self.value_rect = self.value_text.get_rect(centerx=self.title_rect.centerx, top=self.increase_width_button.rect.bottom + 5)
+
+        self.decrease_width_button.rect.centerx = self.title_rect.centerx
+        self.decrease_width_button.rect.top = self.value_rect.bottom + 5
+    
+
+    def set_value(self, new_value):
+        self.value = new_value
+        self.value_text = self.value_font.render(str(self.value), True, "black")
+        self.position_components()
+
+    
+    def draw(self):
+        pg.draw.rect(self.parent, "lightblue", self.rect)
+        self.parent.blit(self.title_text, self.title_rect)
+        self.increase_width_button.draw()
+        self.parent.blit(self.value_text, self.value_rect)
+        self.decrease_width_button.draw()

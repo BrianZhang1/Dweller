@@ -83,19 +83,27 @@ class Map_Creator:
         self.buttons.append(self.settings_button)
 
         # SETTINGS PANEL
-        self.settings_panel = pg.Rect(0, 0, 100, 100)
+        self.settings_panel = pg.Rect(0, 0, 0, 0)
         self.settings_panel.top = self.settings_button.rect.bottom + 10
         self.settings_panel.right = screen_size[0] - 10
 
-        # SETTINGS PANEL SET WIDTH
-        self.increase_width_button = ui.Button(self.parent, self.resources["arrow_up.png"], (0, 0), lambda: self.load_plain_map(self.terrainh.bg_num+1))
-        self.increase_width_button.rect.top = self.settings_panel.top + 5
-        self.increase_width_button.rect.left = self.settings_panel.left + 5
-        self.buttons.append(self.increase_width_button)
-        self.decrease_width_button = ui.Button(self.parent, self.resources["arrow_down.png"], (0, 0), lambda: self.load_plain_map(self.terrainh.bg_num-1))
-        self.decrease_width_button.rect.top = self.increase_width_button.rect.bottom + 5
-        self.decrease_width_button.rect.left = self.settings_panel.left + 5
-        self.buttons.append(self.decrease_width_button)
+        # SETTINGS PANEL SET WIDTH VALUEINCREMENTER
+        # callback for width_incrementer
+        def width_incrementer_callback(value):
+            new_width = self.terrainh.bg_num + value
+            self.set_width(new_width)
+            self.width_incrementer.set_value(new_width)
+
+        self.width_incrementer = ui.Incrementer(self.parent, self.resources, self.buttons, "Map Width", width_incrementer_callback, self.terrainh.bg_num)
+        self.width_incrementer.rect.topright = self.settings_panel.right-5, self.settings_panel.top+5
+        self.width_incrementer.position_components()
+        
+        # update settings panel dimensions/position according to widgets it contains
+        self.settings_panel.width = self.width_incrementer.rect.width + 10
+        self.settings_panel.height = self.width_incrementer.rect.height + 10
+        self.settings_panel.top = self.settings_button.rect.bottom + 10
+        self.settings_panel.right = screen_size[0] - 10
+
 
     
 
@@ -165,8 +173,7 @@ class Map_Creator:
             self.title_tb.draw()
         if self.show_settings:
             pg.draw.rect(self.parent, (160, 160, 160), self.settings_panel)
-            self.increase_width_button.draw()
-            self.decrease_width_button.draw()
+            self.width_incrementer.draw()
         
     
     def move_screen(self, amount):
@@ -228,4 +235,11 @@ class Map_Creator:
             tilemap.append(col)
         
         self.terrainh = terrain.Terrain_Handler(self.parent, self.resources, self.tile_size, tilemap, width)
+
+
+    # set how many bg the width of the map is
+    def set_width(self, new_width):
+        if new_width < 1:
+            new_width = 1
+        self.load_plain_map(new_width)
 
