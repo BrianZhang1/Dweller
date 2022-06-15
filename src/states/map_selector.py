@@ -1,5 +1,5 @@
 import pygame as pg
-from ..components import button
+from ..components import ui
 
 class MapSelector:
     def __init__(self, parent, resources, maps, load_main_menu, load_game):
@@ -13,7 +13,7 @@ class MapSelector:
         self.buttons = []
 
         # BACK BUTTON
-        self.back_button = button.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
+        self.back_button = ui.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
         self.buttons.append(self.back_button)
 
         map_row_size = (screen_size[0]-20, 50)
@@ -65,7 +65,7 @@ class MapRow:
         self.map = map
         self.rect = pg.Rect((0, 0), size)
         self.font = font
-        self.select_button = button.Button(self.parent, self.resources["select_button.png"], (0, 0), lambda map=map: load_game(map))
+        self.select_button = ui.Button(self.parent, self.resources["select_button.png"], (0, 0), lambda map=map: load_game(map))
 
         self.offsety = 0  # most recent offsety level
     

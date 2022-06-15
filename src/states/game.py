@@ -1,5 +1,5 @@
 import pygame as pg
-from ..components import user_interface, player, enemy, terrain
+from ..components import player, enemy, terrain, ui
 
 
 # Controls the game screen
@@ -19,6 +19,7 @@ class Game:
         self.scroll_speed = 5  # speed the background scrolls
         self.score = 0
         self.game_over = False  # whether the game is over
+        self.buttons = []  # list of all button objects for ui
 
         # change enemy spawn cooldown depending on game difficulty
         if self.difficulty == "easy":
@@ -39,18 +40,37 @@ class Game:
         self.obstacles = pg.sprite.Group()
 
         # create initial objects and add to sprite groups
-        self.ui = user_interface.User_Interface(self.parent, self.resources)
         self.player = player.Player(self.parent, self.resources, self.end_game, self.terrain_h.get_nearby_tiles)
         self.all_sprites.add(self.player)
         self.generate_map_enemies()  # generate an enemy for every enemy tile in map
 
-        #self.background_image = resources["background.png"]
-        #self.floor = obstacle.Obstacle(0, 0)
+        # for horizontal camera movement (tracks player movement)
         self.offsetx = self.player.get_centerx() - self.screen_size[0] / 2
 
         # start music
         pg.mixer.music.rewind()
         pg.mixer.music.play(-1)
+
+        # fonts for text
+        self.font1 = pg.font.SysFont("dejavuserif", 50)
+        self.font2 = pg.font.SysFont("Arial", 25)
+
+        # GAME OVER UI
+        centerx = self.screen_size[0]/2
+
+        self.game_over_rect = self.resources["game_over.png"].get_rect()
+        self.game_over_rect.centerx = centerx
+        self.game_over_rect.top = 50
+
+        self.play_again_button = ui.Button(self.parent, self.resources["play_again.png"], (0, 0), lambda: self.start_new_game(score=self.score, map=self.map))
+        self.play_again_button.rect.centerx = centerx
+        self.play_again_button.rect.top = self.game_over_rect.bottom + 70
+        self.buttons.append(self.play_again_button)
+
+        self.main_menu_button = ui.Button(self.parent, self.resources["main_menu_button.png"], (0, 0), lambda: self.load_main_menu(score=self.score))
+        self.main_menu_button.rect.centerx = centerx
+        self.main_menu_button.rect.top = self.play_again_button.rect.bottom + 10
+        self.buttons.append(self.main_menu_button)
 
     # called once per tick by main.py
     def update(self):
@@ -84,7 +104,7 @@ class Game:
                         self.player.move_direction += 1
                     elif event.key == pg.K_a:
                         self.player.move_direction -= 1
-                    elif event.key == pg.K_SPACE:
+                    elif event.key == pg.K_w:
                         self.player.jump()
                 elif event.type == pg.KEYUP:
                     if event.key == pg.K_d:
@@ -93,15 +113,11 @@ class Game:
                         self.player.move_direction += 1
 
             else:
-                # check for click on replay or main menu button
+                # check for click on buttons
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        click_target = self.ui.process_click(event.pos)
-                        if click_target:
-                            if click_target == "start_new_game":
-                                self.start_new_game(score=self.score, map=self.map)
-                            elif click_target == "load_main_menu":
-                                self.load_main_menu(score=self.score)
+                        for button in self.buttons:
+                            button.check_click(event.pos)
 
 
     # draws everything in the game
@@ -118,11 +134,15 @@ class Game:
         self.all_sprites.draw(
             self.parent)  # use pygame built-in draw function for sprite groups
 
-        # render score text
-        self.ui.render_score(self.score)
+        # draw score text
+        self.draw_score(self.score)
 
         if self.game_over:
-            self.ui.render_game_over()
+            # draws everyting when game is over
+            self.parent.blit(self.resources["game_over.png"], self.game_over_rect)
+            self.play_again_button.draw()
+            self.main_menu_button.draw()
+            self.parent.blit(self.high_score_text, self.high_score_rect)
 
     # ends the game upon being called
     def end_game(self):
@@ -131,7 +151,10 @@ class Game:
         # update high score if score is higher than high score
         if self.score > self.high_score:
             self.high_score = self.score
-        self.ui.process_game_over(self.high_score)
+        self.high_score_text = self.font2.render("High Score: " + str(self.high_score), True, "black", "white")
+        self.high_score_rect = self.high_score_text.get_rect()
+        self.high_score_rect.centerx = self.screen_size[0]/2
+        self.high_score_rect.top = self.game_over_rect.bottom + 10
 
         self.game_over = True
 
@@ -223,3 +246,22 @@ class Game:
             self.player.set_centerx(0)
         elif self.player.get_centerx() > self.terrain_h.bg_w:
             self.player.set_centerx(self.terrain_h.bg_w)
+    
+
+    # renders the score text
+    def draw_score(self, score):
+        # create score/speed text objects
+        score_text_content = "Score: " + str(score)
+        score_text = self.font2.render(score_text_content, True, "black", "white")
+        score_text_pos = score_text.get_rect()
+        score_text_pos.right = self.parent.get_width() - 10
+        score_text_pos.top = 10
+        
+        # draw objects
+        self.parent.blit(score_text, score_text_pos)
+
+
+    # must always be called before first call of draw_game_over
+    # positions everything
+        
+

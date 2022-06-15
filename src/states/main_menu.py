@@ -1,5 +1,5 @@
 import pygame
-from ..components.button import Button
+from ..components import ui
 
 # main menu screen
 class Main_Menu:
@@ -20,13 +20,13 @@ class Main_Menu:
     
     self.buttons = []
     # position start button
-    self.start_button = Button(self.parent, self.resources["start_button.png"], (0, 0), self.load_map_selector)
+    self.start_button = ui.Button(self.parent, self.resources["start_button.png"], (0, 0), self.load_map_selector)
     self.start_button.rect.centerx = self.screen_size[0]/2
     self.start_button.rect.top = 80
     self.buttons.append(self.start_button)
 
     # position change difficulty button
-    self.difficulty_button = Button(self.parent, self.resources["difficulty_button.png"], (0, 0), self.load_map_creator)
+    self.difficulty_button = ui.Button(self.parent, self.resources["difficulty_button.png"], (0, 0), self.load_map_creator)
     self.difficulty_button.rect.centerx = self.screen_size[0]/2
     self.difficulty_button.rect.top = self.start_button.rect.bottom + 30
     self.buttons.append(self.difficulty_button)

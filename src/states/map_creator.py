@@ -1,6 +1,5 @@
-from json import load
 import pygame as pg
-from ..components import terrain, button, textbox
+from ..components import terrain, ui, ui
 
 class Map_Creator:
     def __init__(self, parent, resources, tile_size, save_map_callback, load_main_menu):
@@ -24,13 +23,13 @@ class Map_Creator:
         arrow_button_xmargin = 10
 
         # left navigation button
-        self.left_button = button.Button(self.parent, self.resources["arrow_left.png"], (0, 0), lambda: self.move_screen(-100))
+        self.left_button = ui.Button(self.parent, self.resources["arrow_left.png"], (0, 0), lambda: self.move_screen(-100))
         self.left_button.rect.centery = screen_size[1]/2
         self.left_button.rect.left = arrow_button_xmargin
         self.nav_buttons.append(self.left_button)
 
         # right navigation button
-        self.right_button = button.Button(self.parent, self.resources["arrow_right.png"], (0, 0), lambda: self.move_screen(100))
+        self.right_button = ui.Button(self.parent, self.resources["arrow_right.png"], (0, 0), lambda: self.move_screen(100))
         self.right_button.rect.centery = screen_size[1]/2
         self.right_button.rect.right = screen_size[0]-arrow_button_xmargin
         self.nav_buttons.append(self.right_button)
@@ -53,7 +52,7 @@ class Map_Creator:
         self.tpanel_buttons = []
         pos = (self.tpanel_select_rect.left+5, self.tpanel_select_rect.centery-self.tile_size/2)
         for i in range(len(tile_images)):
-            self.tpanel_buttons.append(button.Button(self.parent, tile_images[i], pos, lambda i=i: self.set_selected_tile_type(i)))
+            self.tpanel_buttons.append(ui.Button(self.parent, tile_images[i], pos, lambda i=i: self.set_selected_tile_type(i)))
             pos = (pos[0]+self.tile_size+self.tpanel_tile_margin, pos[1])
         # add tile panel buttons to button list
         for tpanel_button in self.tpanel_buttons:
@@ -61,24 +60,24 @@ class Map_Creator:
 
         # SAVE BUTTON ------------------------------
         save_button_margin = 10
-        self.save_button = button.Button(self.parent, self.resources["save_button.png"], (0, 0), self.toggle_tb)
+        self.save_button = ui.Button(self.parent, self.resources["save_button.png"], (0, 0), self.toggle_tb)
         self.save_button.rect.right = screen_size[0]-save_button_margin
         self.save_button.rect.bottom = screen_size[1]-save_button_margin
         self.buttons.append(self.save_button)
 
         # BACK BUTTON
-        self.back_button = button.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
+        self.back_button = ui.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
         self.buttons.append(self.back_button)
 
         # TITLE MAP TEXT BOX
         self.show_tb = False
-        self.title_tb = textbox.Textbox(self.parent, (300, 60))
+        self.title_tb = ui.Textbox(self.parent, (300, 60))
         self.title_tb.rect.center = (screen_size[0]/2, screen_size[1]/2)
         self.title_tb.update_tb_pos()
 
         # SETTINGS BUTTON
         self.show_settings = False
-        self.settings_button = button.Button(self.parent, self.resources["settings_gear.png"], (0, 0), self.toggle_settings)
+        self.settings_button = ui.Button(self.parent, self.resources["settings_gear.png"], (0, 0), self.toggle_settings)
         self.settings_button.rect.top = 10
         self.settings_button.rect.right = screen_size[0]-10
         self.buttons.append(self.settings_button)
@@ -89,11 +88,11 @@ class Map_Creator:
         self.settings_panel.right = screen_size[0] - 10
 
         # SETTINGS PANEL SET WIDTH
-        self.increase_width_button = button.Button(self.parent, self.resources["arrow_up.png"], (0, 0), lambda: self.load_plain_map(self.terrainh.bg_num+1))
+        self.increase_width_button = ui.Button(self.parent, self.resources["arrow_up.png"], (0, 0), lambda: self.load_plain_map(self.terrainh.bg_num+1))
         self.increase_width_button.rect.top = self.settings_panel.top + 5
         self.increase_width_button.rect.left = self.settings_panel.left + 5
         self.buttons.append(self.increase_width_button)
-        self.decrease_width_button = button.Button(self.parent, self.resources["arrow_down.png"], (0, 0), lambda: self.load_plain_map(self.terrainh.bg_num-1))
+        self.decrease_width_button = ui.Button(self.parent, self.resources["arrow_down.png"], (0, 0), lambda: self.load_plain_map(self.terrainh.bg_num-1))
         self.decrease_width_button.rect.top = self.increase_width_button.rect.bottom + 5
         self.decrease_width_button.rect.left = self.settings_panel.left + 5
         self.buttons.append(self.decrease_width_button)
