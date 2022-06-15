@@ -40,15 +40,15 @@ class Map_Creator:
     
         # TILE PANEL ------------------------------------------------
         # create tile panel (where tiles can be selected)
-        self.tpanel_bg_rect = pg.Rect(0, 0, 300, 60)
-        self.tpanel_bg_rect.centerx = screen_size[0]/2
-        self.tpanel_bg_color = (180, 180, 180)
-
         tile_images = [self.resources["remove.png"], self.resources["Tile_18.png"], self.resources["enemy_tile.png"]]
         self.tpanel_tile_margin = 10
         self.tpanel_select_rect = pg.Rect(0, 0, len(tile_images)*(self.tpanel_tile_margin + tile_size), tile_size+20)
-        self.tpanel_select_rect.center = self.tpanel_bg_rect.center
+        self.tpanel_select_rect.centerx = screen_size[0]/2
         self.tpanel_select_color = (150, 150, 150)
+
+        self.tpanel_bg_rect = pg.Rect(0, 0, self.tpanel_select_rect.width+10, self.tpanel_select_rect.height+10)
+        self.tpanel_bg_rect.center = self.tpanel_select_rect.center
+        self.tpanel_bg_color = (180, 180, 180)
 
         self.tpanel_buttons = []
         pos = (self.tpanel_select_rect.left+5, self.tpanel_select_rect.centery-self.tile_size/2)
@@ -65,6 +65,10 @@ class Map_Creator:
         self.save_button.rect.right = screen_size[0]-save_button_margin
         self.save_button.rect.bottom = screen_size[1]-save_button_margin
         self.buttons.append(self.save_button)
+
+        # BACK BUTTON
+        self.back_button = button.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
+        self.buttons.append(self.back_button)
 
         # TITLE MAP TEXT BOX
         self.show_tb = False
@@ -153,6 +157,7 @@ class Map_Creator:
         # draw buttons
         self.save_button.draw()
         self.settings_button.draw()
+        self.back_button.draw()
         for button in self.nav_buttons:
             button.draw()
 

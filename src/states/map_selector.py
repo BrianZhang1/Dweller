@@ -12,6 +12,7 @@ class MapSelector:
         self.offsety = 0  # for up and down scrolling through map menu
         self.buttons = []
 
+        # BACK BUTTON
         self.back_button = button.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
         self.buttons.append(self.back_button)
 
