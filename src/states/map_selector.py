@@ -9,7 +9,7 @@ class MapSelector:
         self.load_game = load_game
 
         screen_size = (self.parent.get_width(), self.parent.get_height())
-
+        self.offsety = 0  # for up and down scrolling through map menu
         self.buttons = []
 
         self.back_button = button.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
@@ -44,12 +44,16 @@ class MapSelector:
                 if e.button == 1:
                     for button in self.buttons:
                         button.check_click(e.pos)
+                elif e.button == 4:
+                    self.offsety += 20
+                elif e.button == 5:
+                    self.offsety -= 20
 
     
     def draw(self):
         self.parent.fill("black")
         for map_row in self.map_rows:
-            map_row.draw()
+            map_row.draw(self.offsety)
         self.back_button.draw()
 
 
@@ -61,12 +65,20 @@ class MapRow:
         self.rect = pg.Rect((0, 0), size)
         self.font = font
         self.select_button = button.Button(self.parent, self.resources["select_button.png"], (0, 0), lambda map=map: load_game(map))
+
+        self.offsety = 0  # most recent offsety level
     
 
-    def draw(self):
+    def draw(self, offsety):
+        self.update_offsety(offsety)
         pg.draw.rect(self.parent, "green", self.rect)
         self.parent.blit(self.name_text, self.name_rect)
         self.select_button.draw()
+
+
+    def update_offsety(self, new_offsety):
+        self.rect.y += new_offsety - self.offsety
+        self.offsety = new_offsety
     
 
     def load_images(self):
