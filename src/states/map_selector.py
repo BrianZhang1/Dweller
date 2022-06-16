@@ -74,11 +74,14 @@ class MapRow:
         self.update_offsety(offsety)
         pg.draw.rect(self.parent, "green", self.rect)
         self.parent.blit(self.name_text, self.name_rect)
-        self.select_button.draw()
+        self.select_button.draw(offset=(0, offsety))
 
 
+    # compares new offsety to last updated offsety and accounts for the difference
     def update_offsety(self, new_offsety):
+        # update offset of rect
         self.rect.y += new_offsety - self.offsety
+        self.name_rect.y += new_offsety - self.offsety
         self.offsety = new_offsety
     
 

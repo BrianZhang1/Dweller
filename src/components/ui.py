@@ -10,10 +10,19 @@ class Button:
         self.image = image
         self.rect = self.image.get_rect(topleft=init_pos)
         self.command = command
+        self.offset = (0, 0)  # screen offset
     
 
-    def draw(self):
+    def draw(self, offset=(0, 0)):
+        self.update_offset(offset)
         self.parent.blit(self.image, self.rect)
+    
+
+    # update rect depending on difference between new offset and current offset
+    def update_offset(self, new_offset):
+        self.rect.x += new_offset[0] - self.offset[0]
+        self.rect.y += new_offset[1] - self.offset[1]
+        self.offset = new_offset
 
 
     # runs command if this button is clicked
