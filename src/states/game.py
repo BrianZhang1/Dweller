@@ -168,43 +168,6 @@ class Game:
             elif enemy_obj.active_attack:
                 self.player.receive_attack(1)
 
-    # check collisions between entities and nearby tiles
-    def check_tile_collision(self, entity):
-        grounded = False
-        tile_size = self.map.tile_size
-        if isinstance(entity, entities.Player):
-            rect = self.player.get_rect()
-            nearby_tiles = self.map.get_nearby_tiles(self.player.get_center(), radius=2)
-        else:
-            print("not player")
-        for tile in nearby_tiles:
-            if tile.type == 1:
-                tile_rect = pg.Rect((tile.pos[0] - self.offsetx, tile.pos[1]), (tile_size, tile_size))
-
-                if rect.colliderect(tile_rect):
-                    # if top of tile is between the bottom and center of the player, move the player to the top of the tile
-                    if rect.bottom > tile_rect.top and tile_rect.top > rect.centery:
-                        grounded = True
-                        self.player.set_bottom(tile_rect.top + 1)
-                        if self.player.vel_y < 0:
-                            self.player.vel_y = 0
-                    # if bottom of tile is between center and top player, move player top to the bottom of the tile
-                    elif rect.centery > tile_rect.bottom and tile_rect.bottom > rect.top:
-                        self.player.set_bottom(tile_rect.bottom+rect.height)
-                        if self.player.vel_y > 0:
-                            self.player.vel_y = 0
-                    # if right of tile is between left and center, move player left to the right of the tile
-                    elif rect.centerx > tile_rect.right and tile_rect.right > rect.left:
-                        self.player.set_left(tile.pos[0]+self.map.tile_size-1)
-                        if self.player.vel_x < 0:
-                            self.player.vel_x = 0
-                    # if left of tile is between center and right, move player right to the left of the tile
-                    elif rect.right > tile_rect.left and tile_rect.left > rect.centerx:
-                        self.player.set_left(tile.pos[0]-self.map.tile_size)
-                        if self.player.vel_x > 0:
-                            self.player.vel_x = 0
-        self.player.grounded = grounded
-
 
     # generates an enemy for every enemy tile in the map
     def generate_map_enemies(self):
