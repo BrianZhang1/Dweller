@@ -1,18 +1,17 @@
 import pygame as pg
-from ..components import entities, ui
-from ..components import map as _map
+from ..components import entities, ui, map
 
 
 # Controls the game screen
 class Game:
-    def __init__(self, parent, resources, start_new_game, load_main_menu, high_score, difficulty, tile_size, map):
+    def __init__(self, parent, resources, start_new_game, load_main_menu, high_score, difficulty, tile_size, map_data):
         self.parent = parent
         self.resources = resources
         self.start_new_game = start_new_game
         self.load_main_menu = load_main_menu
         self.high_score = high_score
         self.difficulty = difficulty
-        self.map = map
+        self.map_data = map_data
 
         # important variables
         self.cur_time = pg.time.get_ticks()
@@ -31,9 +30,9 @@ class Game:
             self.enemy_cooldown = 4000
         else:
             print("invalid difficulty")
-
-        # create terrain handler
-        self.terrain_h = _map.Map(self.parent, self.resources, tile_size, map["tilemap"], map["width"])
+        
+        # create map object
+        self.map = map.Map(self.parent, self.resources, tile_size, self.map_data)
 
         # create sprite groups
         self.all_sprites = pg.sprite.Group()
@@ -41,7 +40,7 @@ class Game:
         self.obstacles = pg.sprite.Group()
 
         # create initial objects and add to sprite groups
-        self.player = entities.Player(self.parent, self.resources, self.end_game, self.terrain_h.get_nearby_tiles)
+        self.player = entities.Player(self.parent, self.resources, self.end_game, self.map.get_nearby_tiles)
         self.all_sprites.add(self.player)
         self.generate_map_enemies()  # generate an enemy for every enemy tile in map
 
@@ -63,7 +62,7 @@ class Game:
         self.game_over_rect.centerx = centerx
         self.game_over_rect.top = 50
 
-        self.play_again_button = ui.Button(self.parent, self.resources["play_again.png"], (0, 0), lambda: self.start_new_game(score=self.score, map=self.map))
+        self.play_again_button = ui.Button(self.parent, self.resources["play_again.png"], (0, 0), lambda: self.start_new_game(score=self.score, map=self.map_data))
         self.play_again_button.rect.centerx = centerx
         self.play_again_button.rect.top = self.game_over_rect.bottom + 70
         self.buttons.append(self.play_again_button)
@@ -125,7 +124,7 @@ class Game:
     def draw(self):
         self.scroll()  # update screen offset
 
-        self.terrain_h.draw(self.offsetx)
+        self.map.draw(self.offsetx)
 
         # update Rect position of all sprites to prepare to draw
         for sprite in self.all_sprites.sprites():
@@ -172,10 +171,10 @@ class Game:
     # check collisions between entities and nearby tiles
     def check_tile_collision(self, entity):
         grounded = False
-        tile_size = self.terrain_h.tile_size
+        tile_size = self.map.tile_size
         if isinstance(entity, entities.Player):
             rect = self.player.get_rect()
-            nearby_tiles = self.terrain_h.get_nearby_tiles(self.player.get_center(), radius=2)
+            nearby_tiles = self.map.get_nearby_tiles(self.player.get_center(), radius=2)
         else:
             print("not player")
         for tile in nearby_tiles:
@@ -196,12 +195,12 @@ class Game:
                             self.player.vel_y = 0
                     # if right of tile is between left and center, move player left to the right of the tile
                     elif rect.centerx > tile_rect.right and tile_rect.right > rect.left:
-                        self.player.set_left(tile.pos[0]+self.terrain_h.tile_size-1)
+                        self.player.set_left(tile.pos[0]+self.map.tile_size-1)
                         if self.player.vel_x < 0:
                             self.player.vel_x = 0
                     # if left of tile is between center and right, move player right to the left of the tile
                     elif rect.right > tile_rect.left and tile_rect.left > rect.centerx:
-                        self.player.set_left(tile.pos[0]-self.terrain_h.tile_size)
+                        self.player.set_left(tile.pos[0]-self.map.tile_size)
                         if self.player.vel_x > 0:
                             self.player.vel_x = 0
         self.player.grounded = grounded
@@ -209,16 +208,16 @@ class Game:
 
     # generates an enemy for every enemy tile in the map
     def generate_map_enemies(self):
-        for col in self.terrain_h.map.tilemap:
+        for col in self.map.tilemap:
             for tile in col:
                 if tile.type == 2:  # 2 is the type for enemy tile
                     self.generate_enemy(tile.pos)
-                    tile.change_type(0, self.terrain_h.map.tilemap)
+                    tile.change_type(0, self.map.tilemap)
 
 
     # spawn new enemy
     def generate_enemy(self, pos):
-        enemy_obj = entities.Enemy(self.parent, self.resources, pos, self.handle_enemy_death, self.difficulty, self.terrain_h.get_nearby_tiles)
+        enemy_obj = entities.Enemy(self.parent, self.resources, pos, self.handle_enemy_death, self.difficulty, self.map.get_nearby_tiles)
         self.all_sprites.add(self.player, enemy_obj)
         self.enemies.add(enemy_obj)
 
@@ -228,7 +227,7 @@ class Game:
 
     # handles scrolling of camera when player moves
     def scroll(self):
-        bg_w = self.terrain_h.bg_w
+        bg_w = self.map.pixel_width
         new_offsetx = self.player.get_centerx() - self.screen_size[0] / 2
 
         # the offset cannot be less than 0
@@ -245,8 +244,8 @@ class Game:
     def check_bounds(self):
         if self.player.get_centerx() < 0:
             self.player.set_centerx(0)
-        elif self.player.get_centerx() > self.terrain_h.bg_w:
-            self.player.set_centerx(self.terrain_h.bg_w)
+        elif self.player.get_centerx() > self.map.pixel_width:
+            self.player.set_centerx(self.map.pixel_width)
     
 
     # renders the score text

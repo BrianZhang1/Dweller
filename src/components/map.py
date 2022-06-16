@@ -1,13 +1,13 @@
 import pygame as pg
 
 class Map:
-    def __init__(self, parent, resources, tile_size, tilemap, width):
+    def __init__(self, parent, resources, tile_size, map_data):
         self.parent = parent
         self.resources = resources
         self.tile_size = tile_size
         self.tilemap = None
-        self.load_tilemap(tilemap)
-        self.width = width  # number of backgrounds this map is wide
+        self.load_tilemap(map_data["tilemap"])
+        self.width = map_data["width"]  # number of backgrounds this map is wide
 
         self.bg_img = self.resources["bg.png"]
         self.pixel_width = self.width * self.bg_img.get_width() # total width of background in pixels

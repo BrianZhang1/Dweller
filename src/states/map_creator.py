@@ -1,5 +1,5 @@
 import pygame as pg
-from ..components import terrain, ui
+from ..components import ui, map
 
 class Map_Creator:
     def __init__(self, parent, resources, data, tile_size, save_map_callback, load_main_menu):
@@ -91,11 +91,11 @@ class Map_Creator:
         # SETTINGS PANEL SET WIDTH VALUEINCREMENTER
         # callback for width_incrementer
         def width_incrementer_callback(value):
-            new_width = self.terrainh.bg_num + value
+            new_width = self.map.width + value
             self.set_width(new_width)
             self.width_incrementer.set_value(new_width)
 
-        self.width_incrementer = ui.Incrementer(self.parent, self.resources, self.buttons, "Map Width", width_incrementer_callback, self.terrainh.bg_num)
+        self.width_incrementer = ui.Incrementer(self.parent, self.resources, self.buttons, "Map Width", width_incrementer_callback, self.map.width)
         self.width_incrementer.rect.topright = self.settings_panel.right-5, self.settings_panel.top+5
         self.width_incrementer.position_components()
         
@@ -155,7 +155,7 @@ class Map_Creator:
 
     def draw(self):
         self.parent.fill("black")
-        self.terrainh.draw(self.offsetx)
+        self.map.draw(self.offsetx)
         
         # draw tile panel
         pg.draw.rect(self.parent, self.tpanel_bg_color, self.tpanel_bg_rect)
@@ -204,7 +204,7 @@ class Map_Creator:
 
     # save the map
     def save_map(self):
-        error = self.save_map_callback(self.title_tb.content, self.terrainh.map, self.terrainh.bg_num)
+        error = self.save_map_callback(self.title_tb.content, self.map)
         if error != 0:
             self.title_tb.set_error(error, 1000)
         else:
@@ -215,12 +215,12 @@ class Map_Creator:
     def check_place_tile(self):
         if self.placing_tiles:
             mouse_pos = pg.mouse.get_pos()
-            tile = self.terrainh.get_tile((mouse_pos[0]+self.offsetx, mouse_pos[1]))
+            tile = self.map.get_tile((mouse_pos[0]+self.offsetx, mouse_pos[1]))
             if tile != None:
-                tile_changed = tile.change_type(self.selected_tile_type, self.terrainh.map.tilemap)
+                tile_changed = tile.change_type(self.selected_tile_type, self.map.tilemap)
                 if tile_changed:  # if new tile, update surrounding tile images
-                    for tile in self.terrainh.get_nearby_tiles(tile.pos, radius=2):
-                        tile.load_image(self.terrainh.map.tilemap)
+                    for tile in self.map.get_nearby_tiles(tile.pos, radius=2):
+                        tile.load_image(self.map.tilemap)
     
 
     # generates a plain map with just a floor, given width
@@ -239,8 +239,14 @@ class Map_Creator:
                 else:
                     col.append(0)
             tilemap.append(col)
+
+        map_data = {
+            "name": "plain",
+            "tilemap": tilemap,
+            "width": width
+        }
         
-        self.terrainh = terrain.Terrain_Handler(self.parent, self.resources, self.tile_size, tilemap, width)
+        self.map = map.Map(self.parent, self.resources, self.tile_size, map_data)
 
 
     # set how many bg the width of the map is

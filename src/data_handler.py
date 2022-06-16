@@ -81,7 +81,7 @@ class DataHandler:
         return 0
 
 
-    def save_map(self, name, map, width):
+    def save_map(self, name, map):
         # first, check for errors with name
         # check for empty name
         if len(name) == 0:
@@ -102,7 +102,7 @@ class DataHandler:
         map = {
             "name": name,
             "tilemap": new_tilemap,
-            "width": width
+            "width": map.width
         }
 
         self.data["maps"].append(map)
