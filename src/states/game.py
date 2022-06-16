@@ -1,5 +1,6 @@
 import pygame as pg
-from ..components import entities, terrain, ui
+from ..components import entities, ui
+from ..components import map as _map
 
 
 # Controls the game screen
@@ -32,7 +33,7 @@ class Game:
             print("invalid difficulty")
 
         # create terrain handler
-        self.terrain_h = terrain.Terrain_Handler(self.parent, self.resources, tile_size, map["tilemap"], map["width"])
+        self.terrain_h = _map.Map(self.parent, self.resources, tile_size, map["tilemap"], map["width"])
 
         # create sprite groups
         self.all_sprites = pg.sprite.Group()

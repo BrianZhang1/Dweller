@@ -1,13 +1,16 @@
 import pygame as pg
 
 class Map:
-    def __init__(self, parent, resources, tile_size, tilemap=None):
+    def __init__(self, parent, resources, tile_size, tilemap, width):
         self.parent = parent
         self.resources = resources
         self.tile_size = tile_size
         self.tilemap = None
-        if tilemap:
-            self.load_tilemap(tilemap, resources)
+        self.load_tilemap(tilemap)
+        self.width = width  # number of backgrounds this map is wide
+
+        self.bg_img = self.resources["bg.png"]
+        self.pixel_width = self.width * self.bg_img.get_width() # total width of background in pixels
 
 
     # tilemap argument is a 2d array of tiles
@@ -38,9 +41,44 @@ class Map:
 
     # draw the tilemap onto the screen
     def draw(self, offsetx):
+        self.draw_background(offsetx)
         for col in self.tilemap:
             for tile in col:
                 tile.draw(self.parent, offsetx)
+
+
+    def draw_background(self, offsetx):
+        for i in range(self.width):
+            posx = i * self.bg_img.get_width() - offsetx
+            self.parent.blit(self.bg_img, (posx, 0))
+
+
+    # gets the index of the tile that pos is on
+    def get_tile(self, pos):
+        try:
+            tile = self.tilemap[int(pos[0]/self.tile_size)][int(pos[1]/self.tile_size)] # index of closest tile to pos
+        except IndexError:
+            print("Tile out of tilemap range.")
+            tile = None
+        return tile
+    
+
+    # returns a list of all nearby tiles
+    # pos is the position to find tiles nearby
+    # radius is how many tiles the search should be
+    def get_nearby_tiles(self, pos, radius=2):
+        nearby_tiles = []
+        tile_index = self.get_tile(pos).list_pos
+        # next, search around the tile
+        t = (tile_index[0]-radius+1, tile_index[1]-radius+1) # top left tile in search radius
+        for i in range(2*radius-1):
+            for k in range(2*radius-1):
+                try:
+                  nearby_tiles.append(self.tilemap[t[0]+i][t[1]+k])
+                except IndexError:
+                  pass
+        
+        return nearby_tiles
 
 
 

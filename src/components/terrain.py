@@ -18,8 +18,7 @@ class Terrain_Handler:
 
         self.bg_w = self.bg_num * self.bg_img.get_width() # total width of background
 
-        self.map = map.Map(self.parent, self.resources, self.tile_size)
-        self.map.load_tilemap(tilemap)
+        self.map = map.Map(self.parent, self.resources, self.tile_size, tilemap, width)
 
 
 
