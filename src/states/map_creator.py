@@ -1,5 +1,5 @@
 import pygame as pg
-from ..components import terrain, ui, ui
+from ..components import terrain, ui
 
 class Map_Creator:
     def __init__(self, parent, resources, data, tile_size, save_map_callback, load_main_menu):

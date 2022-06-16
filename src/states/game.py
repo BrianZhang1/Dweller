@@ -1,5 +1,5 @@
 import pygame as pg
-from ..components import player, enemy, terrain, ui
+from ..components import entities, terrain, ui
 
 
 # Controls the game screen
@@ -40,7 +40,7 @@ class Game:
         self.obstacles = pg.sprite.Group()
 
         # create initial objects and add to sprite groups
-        self.player = player.Player(self.parent, self.resources, self.end_game, self.terrain_h.get_nearby_tiles)
+        self.player = entities.Player(self.parent, self.resources, self.end_game, self.terrain_h.get_nearby_tiles)
         self.all_sprites.add(self.player)
         self.generate_map_enemies()  # generate an enemy for every enemy tile in map
 
@@ -172,7 +172,7 @@ class Game:
     def check_tile_collision(self, entity):
         grounded = False
         tile_size = self.terrain_h.tile_size
-        if isinstance(entity, player.Player):
+        if isinstance(entity, entities.Player):
             rect = self.player.get_rect()
             nearby_tiles = self.terrain_h.get_nearby_tiles(self.player.get_center(), radius=2)
         else:
@@ -217,7 +217,7 @@ class Game:
 
     # spawn new enemy
     def generate_enemy(self, pos):
-        enemy_obj = enemy.Enemy(self.parent, self.resources, pos, self.handle_enemy_death, self.difficulty, self.terrain_h.get_nearby_tiles)
+        enemy_obj = entities.Enemy(self.parent, self.resources, pos, self.handle_enemy_death, self.difficulty, self.terrain_h.get_nearby_tiles)
         self.all_sprites.add(self.player, enemy_obj)
         self.enemies.add(enemy_obj)
 
