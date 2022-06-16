@@ -103,6 +103,7 @@ class Tile:
         self.pos = pos # absolute pos (topleft)
 
         self.image = None
+        self.length = 32
 
 
     # loads image for the tile depending on the tiles surrounding it
@@ -197,4 +198,9 @@ class Tile:
             self.load_image(tilemap)
             return True  # true means the type was changed
         return False # false means no change occured
+    
+
+    def get_rect(self, offsetx):
+        if self.type != 0:
+            return self.image.get_rect(left=self.pos[0]-offsetx, top=self.pos[1])
 

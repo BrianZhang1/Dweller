@@ -167,6 +167,9 @@ class Game:
                 enemy_obj.receive_attack(1)
             elif enemy_obj.active_attack:
                 self.player.receive_attack(1)
+        
+        if self.player.collide_type(self.offsetx, [3, 4, 5, 6]):
+            print("portal collide")
 
 
     # generates an enemy for every enemy tile in the map

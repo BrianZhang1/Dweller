@@ -334,6 +334,28 @@ class Entity(pg.sprite.Sprite):
   def unpause_animation(self):
     self.animation_paused = False
     self.pause_time = None
+
+
+  # checks if this entity collides with tile type given
+  def collide_type(self, offsetx, type):
+    rect = self.get_rect(offsetx)  # rect of current pos of player
+    tiles = self.get_nearby_tiles(self.get_center(), 3)
+
+    # try to treat type as a list of types
+    try:
+      for tile in tiles:
+        if tile.type in type:
+          if rect.colliderect(tile.get_rect(offsetx)):
+            return tile
+    except TypeError:  # type is a single type, not a list
+      for tile in tiles:
+        if tile.type == type:
+          if rect.colliderect(tile.get_rect(offsetx)):
+            return tile
+    
+    return None # no tile found
+
+    
   
 
 
@@ -391,6 +413,9 @@ class Healthbar:
     
     self.parent.blit(text, text_pos)
 
+
+
+
 class Player(Entity):
   def __init__(self, parent, resources, end_game, get_nearby_tiles):
 
@@ -436,10 +461,6 @@ class Player(Entity):
     }
 
 
-
-  # same as Entity.move, except it accounts for offset when flipping the image (since the player is not centered in the image)
-  
-
   def update(self, cur_time, offsetx):
     super().update(cur_time, offsetx)
     if self.grounded:
@@ -455,6 +476,8 @@ class Player(Entity):
       self.change_state("jump")
 
 
+  # checks if direction changed, then acts accordingly
+  # new_direction = -1 | 0 | 1  ->  left | none | right  
   def try_change_direction(self, new_direction):
     if new_direction != 0:
       if self.direction == 0 and new_direction == 1:
@@ -543,7 +566,7 @@ class Player(Entity):
   def handle_attack(self):
     super().handle_attack()
     self.move()
-    
+  
 
 
 class Enemy(Entity):
