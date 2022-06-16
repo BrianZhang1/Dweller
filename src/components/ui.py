@@ -37,10 +37,10 @@ class Button:
 # class for textboxes where user can enter text
 # tb is short for textbox
 class Textbox:
-    def __init__(self, parent, size):
+    def __init__(self, parent, size, init_content=""):
         self.parent = parent
         self.rect = pg.Rect((0, 0), size)
-        self.content = "sample"  # content in the textbox
+        self.content = init_content  # content in the textbox
 
         self.tb_bg_color = (100, 100, 100)
 
@@ -49,6 +49,18 @@ class Textbox:
         entry_margin = 5
         self.entry_rect = pg.Rect(0, 0, size[0]-2*entry_margin, size[1]-2*entry_margin)  # entry box
         self.font = pg.font.Font(None, size[1]-2*entry_margin)
+        
+        # handling errors with input
+        self.error = None  
+        self.error_start_time = None
+        self.error_duration = None
+    
+
+    def update(self):
+        if self.error != None:
+            cur_time = pg.time.get_ticks()
+            if cur_time - self.error_start_time >= self.error_duration:
+                self.end_error()
 
 
     def draw(self):
@@ -58,7 +70,10 @@ class Textbox:
     
 
     def draw_entry_text(self):
-        text = self.font.render(self.content, True, "black")
+        if self.error == None:
+            text = self.font.render(self.content, True, "black")
+        else:
+            text = self.font.render(self.error, True, "red")
         text_rect = text.get_rect()
         text_rect.center = self.entry_rect.center
         self.parent.blit(text, text_rect)
@@ -66,6 +81,18 @@ class Textbox:
 
     def update_tb_pos(self):
         self.entry_rect.center = self.rect.center
+    
+
+    def set_error(self, error, duration):
+        self.error = error
+        self.error_start_time = pg.time.get_ticks()
+        self.error_duration = duration
+    
+
+    def end_error(self):
+        self.error = None
+        self.error_start_time = None
+        self.error_duration = None
 
 
 # has up and down arrow buttons that can increment or decrement a value

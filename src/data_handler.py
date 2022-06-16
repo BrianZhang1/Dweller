@@ -82,6 +82,15 @@ class DataHandler:
 
 
     def save_map(self, name, map, width):
+        # first, check for errors with name
+        # check for empty name
+        if len(name) == 0:
+            return "Name Empty."
+        # check for duplicate name
+        for data_map in self.data["maps"]:
+            if data_map["name"] == name:
+                return "Duplicate Name."
+
         # transform map into list with tile types
         new_tilemap = []
         for col in map.tilemap:
@@ -98,3 +107,5 @@ class DataHandler:
 
         self.data["maps"].append(map)
         self.write_data()
+
+        return 0

@@ -2,9 +2,10 @@ import pygame as pg
 from ..components import terrain, ui, ui
 
 class Map_Creator:
-    def __init__(self, parent, resources, tile_size, save_map_callback, load_main_menu):
+    def __init__(self, parent, resources, data, tile_size, save_map_callback, load_main_menu):
         self.parent = parent
         self.resources = resources
+        self.data = data
         self.tile_size = tile_size
         self.save_map_callback = save_map_callback
         self.load_main_menu = load_main_menu
@@ -71,7 +72,7 @@ class Map_Creator:
 
         # TITLE MAP TEXT BOX
         self.show_tb = False
-        self.title_tb = ui.Textbox(self.parent, (300, 60))
+        self.title_tb = ui.Textbox(self.parent, (300, 60), "Map"+str(len(self.data["maps"])))
         self.title_tb.rect.center = (screen_size[0]/2, screen_size[1]/2)
         self.title_tb.update_tb_pos()
 
@@ -110,6 +111,7 @@ class Map_Creator:
     def update(self):
         self.handle_events()
         self.check_place_tile()  # place a tile at mouse pos if self.placing_tiles is true
+        self.title_tb.update()
         self.draw()
 
 
@@ -202,8 +204,12 @@ class Map_Creator:
 
     # save the map
     def save_map(self):
-        self.save_map_callback(self.title_tb.content, self.terrainh.map, self.terrainh.bg_num)
-        self.load_main_menu()
+        error = self.save_map_callback(self.title_tb.content, self.terrainh.map, self.terrainh.bg_num)
+        if error != 0:
+            self.title_tb.set_error(error, 1000)
+        else:
+            self.load_main_menu()
+
     
     # place a tile at mouse pos if self.placing_tiles is true
     def check_place_tile(self):
