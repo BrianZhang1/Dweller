@@ -83,6 +83,15 @@ class Map:
 
 
 # class for an individual tile
+# TILE TYPE REFERENCE:
+# tile.type = 0 | 1 | 2 | 3
+# 0 = empty
+# 1 = ground
+# 2 = enemy
+# 3 = portal 1
+# 4 = portal 2
+# 5 = portal 3
+# 6 = portal 4
 class Tile:
     def __init__(self, resources, type, list_pos, pos):
         # top/right/bottom/left are boolean values that identify the tiles surrounding this tile
@@ -134,6 +143,15 @@ class Tile:
         
         elif self.type == 2:
             self.image = self.resources["enemy_tile.png"]
+        
+        elif self.type == 3:
+            self.image = self.resources["portal1.png"]
+        elif self.type == 4:
+            self.image = self.resources["portal2.png"]
+        elif self.type == 5:
+            self.image = self.resources["portal3.png"]
+        elif self.type == 6:
+            self.image = self.resources["portal4.png"]
 
 
     # checks whether tiles surrounding this tile are non-empty using given tilemap
@@ -166,7 +184,7 @@ class Tile:
     def draw(self, parent, offsetx):
         if self.type != 0:
             pos = (self.pos[0]-offsetx, self.pos[1])
-            if self.type in [1, 2]:
+            if self.type in [1, 2, 3, 4, 5, 6]:
                 parent.blit(self.image, pos)
             else:
                 print("Invalid tile type:", self.type)

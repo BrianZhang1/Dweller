@@ -16,6 +16,7 @@ class Map_Creator:
         self.selected_tile_type = 1  # type of selected tile
         self.buttons = [] # list of all buttons
         self.placing_tiles = False  # so user can click and drag to place multiple tiles
+        self.portal = None  # location of the portal (ends level when player reaches this)
 
         # NAVIGATION BUTTONS -----------------------------------
         # buttons at side of screen to move screen
@@ -40,7 +41,7 @@ class Map_Creator:
     
         # TILE PANEL ------------------------------------------------
         # create tile panel (where tiles can be selected)
-        tile_images = [self.resources["remove.png"], self.resources["Tile_18.png"], self.resources["enemy_tile.png"]]
+        tile_images = [self.resources["remove.png"], self.resources["Tile_18.png"], self.resources["enemy_tile.png"], self.resources["portal_display.png"]]
         self.tpanel_tile_margin = 10
         self.tpanel_select_rect = pg.Rect(0, 0, len(tile_images)*(self.tpanel_tile_margin + tile_size), tile_size+20)
         self.tpanel_select_rect.centerx = screen_size[0]/2
@@ -217,10 +218,13 @@ class Map_Creator:
             mouse_pos = pg.mouse.get_pos()
             tile = self.map.get_tile((mouse_pos[0]+self.offsetx, mouse_pos[1]))
             if tile != None:
-                tile_changed = tile.change_type(self.selected_tile_type, self.map.tilemap)
-                if tile_changed:  # if new tile, update surrounding tile images
-                    for tile in self.map.get_nearby_tiles(tile.pos, radius=2):
-                        tile.load_image(self.map.tilemap)
+                if self.selected_tile_type == 3:
+                    self.place_portal(tile)
+                else:
+                    tile_changed = tile.change_type(self.selected_tile_type, self.map.tilemap)
+                    if tile_changed:  # if new tile, update surrounding tile images
+                        for tile in self.map.get_nearby_tiles(tile.pos, radius=2):
+                            tile.load_image(self.map.tilemap)
     
 
     # generates a plain map with just a floor, given width
@@ -254,4 +258,30 @@ class Map_Creator:
         if new_width < 1:
             new_width = 1
         self.load_plain_map(new_width)
+    
+
+    # places the portal to end level
+    # the portal is 2x2 tiles
+    # tile argument is the top left tile of the portal
+    def place_portal(self, tile):
+        tilemap = self.map.tilemap
+
+        # first, check if space is available for portal
+        if len(tilemap) - tile.list_pos[0] >= 2 and len(tilemap[0]) - tile.list_pos[1] >= 2:
+            # remove old portal if it exists
+            if self.portal != None:
+                # change tiles of old portal to empty tiles
+                tilemap[self.portal.list_pos[0]][self.portal.list_pos[1]].change_type(0, tilemap)
+                tilemap[self.portal.list_pos[0]+1][self.portal.list_pos[1]].change_type(0, tilemap)
+                tilemap[self.portal.list_pos[0]][self.portal.list_pos[1]+1].change_type(0, tilemap)
+                tilemap[self.portal.list_pos[0]+1][self.portal.list_pos[1]+1].change_type(0, tilemap)
+            self.portal = tile
+
+            # change tiles to portal tiles
+            tilemap[tile.list_pos[0]][tile.list_pos[1]].change_type(3, tilemap)
+            tilemap[tile.list_pos[0]+1][tile.list_pos[1]].change_type(4, tilemap)
+            tilemap[tile.list_pos[0]][tile.list_pos[1]+1].change_type(5, tilemap)
+            tilemap[tile.list_pos[0]+1][tile.list_pos[1]+1].change_type(6, tilemap)
+        else:
+            print("Not enough space for portal.")
 
