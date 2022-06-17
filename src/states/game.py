@@ -58,13 +58,9 @@ class Game:
         # GAME OVER UI
         centerx = self.screen_size[0]/2
 
-        self.game_over_rect = self.resources["game_over.png"].get_rect()
-        self.game_over_rect.centerx = centerx
-        self.game_over_rect.top = 50
-
         self.play_again_button = ui.Button(self.parent, self.resources["play_again.png"], (0, 0), lambda: self.start_new_game(score=self.score, map=self.map_data))
         self.play_again_button.rect.centerx = centerx
-        self.play_again_button.rect.top = self.game_over_rect.bottom + 70
+        self.play_again_button.rect.top = 200
         self.buttons.append(self.play_again_button)
 
         self.main_menu_button = ui.Button(self.parent, self.resources["main_menu_button.png"], (0, 0), lambda: self.load_main_menu(score=self.score))
@@ -137,24 +133,41 @@ class Game:
         # draw score text
         self.draw_score(self.score)
 
+        # drawing ui when game is over
         if self.game_over:
-            # draws everyting when game is over
-            self.parent.blit(self.resources["game_over.png"], self.game_over_rect)
+            if not self.win:
+                self.parent.blit(self.resources["game_over.png"], self.game_over_rect)
+            else:
+                self.parent.blit(self.resources["level_complete.png"], self.level_complete_rect)
+
+            self.parent.blit(self.high_score_text, self.high_score_rect)
             self.play_again_button.draw()
             self.main_menu_button.draw()
-            self.parent.blit(self.high_score_text, self.high_score_rect)
 
     # ends the game upon being called
-    def end_game(self):
+    def end_game(self, win=False):
+        self.win = win
         pg.mixer.music.stop()
 
         # update high score if score is higher than high score
         if self.score > self.high_score:
             self.high_score = self.score
+
+        # positioning images for post-game ui
+        centerx = self.screen_size[0]/2  # for positioning
         self.high_score_text = self.font2.render("High Score: " + str(self.high_score), True, "black", "white")
         self.high_score_rect = self.high_score_text.get_rect()
-        self.high_score_rect.centerx = self.screen_size[0]/2
-        self.high_score_rect.top = self.game_over_rect.bottom + 10
+        self.high_score_rect.centerx = centerx
+        if not win:
+            self.game_over_rect = self.resources["game_over.png"].get_rect()
+            self.game_over_rect.centerx = centerx
+            self.game_over_rect.top = 50
+            self.high_score_rect.top = self.game_over_rect.bottom + 10
+        else:
+            self.level_complete_rect = self.resources["level_complete.png"].get_rect()
+            self.level_complete_rect.centerx = centerx
+            self.level_complete_rect.top = 50
+            self.high_score_rect.top = self.level_complete_rect.bottom + 10
 
         self.game_over = True
 
@@ -168,8 +181,9 @@ class Game:
             elif enemy_obj.active_attack:
                 self.player.receive_attack(1)
         
+        # check if player reaches portal to end level
         if self.player.collide_type(self.offsetx, [3, 4, 5, 6]):
-            print("portal collide")
+            self.end_game(win=True)
 
 
     # generates an enemy for every enemy tile in the map
