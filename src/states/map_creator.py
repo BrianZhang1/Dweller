@@ -73,7 +73,7 @@ class Map_Creator:
 
         # TITLE MAP TEXT BOX
         self.show_tb = False
-        self.title_tb = ui.Textbox(self.parent, (300, 60), "Map"+str(len(self.data["maps"])))
+        self.title_tb = ui.Textbox(self.parent, (300, 60), "Map Title", "Map"+str(len(self.data["maps"])))
         self.title_tb.rect.center = (screen_size[0]/2, screen_size[1]/2)
         self.title_tb.update_tb_pos()
 

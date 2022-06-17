@@ -37,18 +37,26 @@ class Button:
 # class for textboxes where user can enter text
 # tb is short for textbox
 class Textbox:
-    def __init__(self, parent, size, init_content=""):
+    def __init__(self, parent, size, title=None, init_content=""):
         self.parent = parent
         self.rect = pg.Rect((0, 0), size)
         self.content = init_content  # content in the textbox
+        self.title = title
+        self.margin = 5
 
+
+        # title and entry area take up 30 and 70 percent of total textbox height respectively
+        self.title_font = pg.font.Font(None, int(size[1]*0.3))
+        self.content_font = pg.font.Font(None, int(size[1]*0.7)-2*self.margin)
         self.tb_bg_color = (100, 100, 100)
 
         # Entry box (where text appears when user types)
         self.entry_color = (255, 255, 255)
-        entry_margin = 5
-        self.entry_rect = pg.Rect(0, 0, size[0]-2*entry_margin, size[1]-2*entry_margin)  # entry box
-        self.font = pg.font.Font(None, size[1]-2*entry_margin)
+        if title != None:
+            self.title_text = self.title_font.render(title, True, "black")
+            self.entry_rect = pg.Rect(0, 0, size[0]-2*self.margin, int(size[1]*0.7)-2*self.margin)  # entry box
+        else:
+            self.entry_rect = pg.Rect(0, 0, size[0]-2*self.margin, size[1]-2*self.margin)  # entry box
         
         # handling errors with input
         self.error = None  
@@ -66,21 +74,27 @@ class Textbox:
     def draw(self):
         pg.draw.rect(self.parent, self.tb_bg_color, self.rect)
         pg.draw.rect(self.parent, self.entry_color, self.entry_rect)
+        self.parent.blit(self.title_text, self.title_rect)
         self.draw_entry_text()
     
 
     def draw_entry_text(self):
         if self.error == None:
-            text = self.font.render(self.content, True, "black")
+            text = self.content_font.render(self.content, True, "black")
         else:
-            text = self.font.render(self.error, True, "red")
+            text = self.content_font.render(self.error, True, "red")
         text_rect = text.get_rect()
         text_rect.center = self.entry_rect.center
         self.parent.blit(text, text_rect)
 
 
     def update_tb_pos(self):
-        self.entry_rect.center = self.rect.center
+        if self.title != None:
+            self.title_rect = self.title_text.get_rect(centerx=self.rect.centerx, top=self.rect.top+self.margin)
+            self.entry_rect.centerx = self.rect.centerx
+            self.entry_rect.top = self.title_rect.bottom+5
+        else:
+            self.entry_rect.center = self.rect.center
     
 
     def set_error(self, error, duration):
