@@ -20,6 +20,7 @@ class Game:
         self.score = 0
         self.game_over = False  # whether the game is over
         self.buttons = []  # list of all button objects for ui
+        self.paused = False
 
         # change enemy spawn cooldown depending on game difficulty
         if self.difficulty == "easy":
@@ -74,7 +75,7 @@ class Game:
         self.cur_time = pg.time.get_ticks()
         self.handle_events()
 
-        if not self.game_over:
+        if not self.game_over and not self.paused:
             self.player.update(self.cur_time, self.offsetx)
             self.check_bounds()
             self.enemies.update(self.cur_time, self.offsetx, self.player.get_centerx())
@@ -90,18 +91,24 @@ class Game:
                 pg.quit()
 
             if not self.game_over:
-                # check for mouse clicks for attacks
-                # keyboard input is handled in handle_keyboard method below
                 if event.type == pg.MOUSEBUTTONDOWN:
+                    # CHECK CLICK FOR ATTACK
                     if event.button == 1:
                         self.player.begin_attack()
+
                 elif event.type == pg.KEYDOWN:
+                    # PLAYER MOVEMENT
                     if event.key == pg.K_d:
                         self.player.move_direction += 1
                     elif event.key == pg.K_a:
                         self.player.move_direction -= 1
                     elif event.key == pg.K_w:
                         self.player.jump()
+                    # PAUSE HANDLING
+                    elif event.key == pg.K_ESCAPE:
+                        self.toggle_pause()
+
+
                 elif event.type == pg.KEYUP:
                     if event.key == pg.K_d:
                         self.player.move_direction -= 1
@@ -234,14 +241,18 @@ class Game:
         score_text_content = "Score: " + str(score)
         score_text = self.font2.render(score_text_content, True, "black", "white")
         score_text_pos = score_text.get_rect()
-        score_text_pos.right = self.parent.get_width() - 10
+        score_text_pos.left = 10
         score_text_pos.top = 10
         
         # draw objects
         self.parent.blit(score_text, score_text_pos)
+    
 
-
-    # must always be called before first call of draw_game_over
-    # positions everything
-        
+    def toggle_pause(self):
+        if self.paused == False:
+            self.paused = True
+            pg.mixer.music.pause()
+        else:
+            self.paused = False
+            pg.mixer.music.unpause()
 
