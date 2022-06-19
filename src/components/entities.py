@@ -590,22 +590,36 @@ class Enemy(Entity):
     # health changes depending on difficulty
     if difficulty == "easy":
       health = 2
+      speed = 2
     elif difficulty == "okay":
       health = 3
+      speed = 3
     if difficulty == "hard":
       health = 4
-    super().__init__(parent, resources, init_pos, 50, health, 2, active_attack_frames, get_nearby_tiles)
+      speed = 4
+    super().__init__(parent, resources, init_pos, 50, health, speed, active_attack_frames, get_nearby_tiles)
 
     # load sounds
     self.attack_sound = resources["swing.mp3"]
     self.hurt_sound = resources["enemy_hurt.mp3"]
     self.death_sound = resources["enemy_hurt.mp3"]
 
+    self.active = False # whether enemy is active or not
+    # enemies become active after they see the player
+
 
   # called once per tick
   def update(self, cur_time, offsetx, player_centerx):
     self.player_centerx = player_centerx
-    super().update(cur_time, offsetx)
+
+    # activate upon getting close to player
+    if not self.active:
+      if abs(self.pos[0]-self.player_centerx) < 300:
+        self.active = True
+
+    # once active, update normally
+    else:
+      super().update(cur_time, offsetx)
 
 
   def handle_idle(self):
@@ -650,8 +664,6 @@ class Enemy(Entity):
 
   def set_bottom(self, bottom):
     self.pos[1] = bottom+4
-
-
 
 
   # moves towards the player's location

@@ -243,7 +243,7 @@ class Game:
         # check if player reaches portal to end level
         if self.player.collide_type(self.offsetx, [3, 4, 5, 6]):
             self.end_game(win=True)
-
+    
 
     # generates an enemy for every enemy tile in the map
     def generate_map_enemies(self):
