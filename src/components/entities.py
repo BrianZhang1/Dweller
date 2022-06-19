@@ -436,7 +436,9 @@ class Player(Entity):
 
     init_pos = (100, 367)
     active_attack_frames = [3, 4]
-    self.attack_recovery = 400 # time it takes to recover after finishing attack
+    self.attack_recovery = 1200 # time it takes to recover after finishing attack
+    self.last_attack = 0  # time of last attack
+
     self.jump_count = 0
     self.jump_ability = 1  # how many jumps the player can make in the air
     self.jump_power = 12 # how high the player can jump in 1 jump
@@ -494,6 +496,15 @@ class Player(Entity):
   def handle_dying(self):
     if self.animation_step >= self.animation_ref["dead"][2]:
       self.end_game()
+  
+
+  # override begin attack to add attack cooldown
+  def begin_attack(self):
+    cur_time = pg.time.get_ticks()
+    if cur_time - self.last_attack > self.attack_recovery:
+      super().begin_attack()
+      self.last_attack = cur_time
+
 
 
   # gets rect of the actual player rather than entire sprite (sprite is a huge rectangle)
@@ -518,7 +529,6 @@ class Player(Entity):
       
 
     return rect
-    
 
 
   # the sprite is left aligned, so centerx is the x position of the actual player section of the image rather than the entire image
