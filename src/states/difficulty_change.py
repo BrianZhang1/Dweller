@@ -1,4 +1,5 @@
 import pygame
+from ..components import ui
 
 # controls the diffculty selection screen
 class Difficulty_Change:
@@ -8,12 +9,12 @@ class Difficulty_Change:
     self.load_main_menu = load_main_menu
 
     self.screen_size = (parent.get_width(), parent.get_height())
+    self.buttons = []
 
     # assets for buttons
     self.easy_image = resources["easy.png"]
     self.okay_image = resources["okay.png"]
     self.hard_image = resources["hard.png"]
-
 
     # create current difficulty text
     self.font2 = pygame.font.SysFont("Arial", 25)
@@ -23,7 +24,11 @@ class Difficulty_Change:
     self.cur_difficulty_pos = (cur_difficulty_x, cur_difficulty_y)
     self.cur_difficulty_text = self.font2.render(self.cur_difficulty_content, True, "black")
     
-    # position buttons
+    # BACK BUTTON
+    self.back_button = ui.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
+    self.buttons.append(self.back_button)
+
+    # DIFFICULTY BUTTONS
     top_margin = 70
     y_between = 10  # length between buttons (vertically)
     button_height = self.easy_image.get_height()
@@ -58,17 +63,19 @@ class Difficulty_Change:
 
       if event.type == pygame.MOUSEBUTTONDOWN:
         if event.button == 1:
+          self.back_button.check_click(event.pos)
           if self.easy_hitbox.collidepoint(event.pos):
             self.load_main_menu("easy")
-          if self.okay_hitbox.collidepoint(event.pos):
+          elif self.okay_hitbox.collidepoint(event.pos):
             self.load_main_menu("okay")
-          if self.hard_hitbox.collidepoint(event.pos):
+          elif self.hard_hitbox.collidepoint(event.pos):
             self.load_main_menu("hard")
 
 
   # draws everything on screen
   def render(self):
     self.parent.fill("burlywood1")
+    self.back_button.draw()
     self.parent.blit(self.cur_difficulty_text, self.cur_difficulty_pos)
     self.parent.blit(self.easy_image, self.easy_pos)
     self.parent.blit(self.okay_image, self.okay_pos)
