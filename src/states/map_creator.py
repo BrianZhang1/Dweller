@@ -76,6 +76,7 @@ class Map_Creator:
         self.title_tb = ui.Textbox(self.parent, (300, 60), "Map Title", "Map"+str(len(self.data["maps"])))
         self.title_tb.rect.center = (screen_size[0]/2, screen_size[1]/2)
         self.title_tb.update_tb_pos()
+        self.enter_to_save_rect = self.resources["enter_to_save_text.png"].get_rect(centerx=screen_size[0]/2, top=self.title_tb.rect.bottom+20)
 
         # SETTINGS BUTTON
         self.show_settings = False
@@ -174,6 +175,7 @@ class Map_Creator:
         # show optional menus
         if self.show_tb:
             self.title_tb.draw()
+            self.parent.blit(self.resources["enter_to_save_text.png"], self.enter_to_save_rect)
         if self.show_settings:
             pg.draw.rect(self.parent, (160, 160, 160), self.settings_panel)
             self.width_incrementer.draw()

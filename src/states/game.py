@@ -17,10 +17,12 @@ class Game:
         self.cur_time = pg.time.get_ticks()
         self.screen_size = (parent.get_width(), parent.get_height())
         self.scroll_speed = 5  # speed the background scrolls
-        self.score = 0
+        self.enemies_defeated = 0
         self.game_over = False  # whether the game is over
         self.buttons = []  # list of all button objects for ui
         self.paused = False
+        self.tick_count = 0 # used to track how long since the game has started
+        self.music_on = True
 
         # change enemy spawn cooldown depending on game difficulty
         if self.difficulty == "easy":
@@ -59,15 +61,41 @@ class Game:
         # GAME OVER UI
         centerx = self.screen_size[0]/2
 
-        self.play_again_button = ui.Button(self.parent, self.resources["play_again.png"], (0, 0), lambda: self.start_new_game(score=self.score, map=self.map_data))
+        self.play_again_button = ui.Button(self.parent, self.resources["play_again.png"], (0, 0), lambda: self.start_new_game(score=self.enemies_defeated, map=self.map_data))
         self.play_again_button.rect.centerx = centerx
-        self.play_again_button.rect.top = 200
-        self.buttons.append(self.play_again_button)
+        self.play_again_button.rect.top = 240
 
-        self.main_menu_button = ui.Button(self.parent, self.resources["main_menu_button.png"], (0, 0), lambda: self.load_main_menu(score=self.score))
+        self.main_menu_button = ui.Button(self.parent, self.resources["main_menu_button.png"], (0, 0), lambda: self.load_main_menu(score=self.enemies_defeated))
         self.main_menu_button.rect.centerx = centerx
         self.main_menu_button.rect.top = self.play_again_button.rect.bottom + 10
-        self.buttons.append(self.main_menu_button)
+
+        self.game_over_buttons = [self.play_again_button, self.main_menu_button]
+        self.buttons.extend(self.game_over_buttons)
+
+        # PAUSE UI
+        # dim screen
+        self.screen_dimmer = pg.Surface(self.screen_size)
+        self.screen_dimmer.set_alpha(128)
+        self.screen_dimmer.fill("black")
+
+        # Buttons for Pause Screen
+        self.resume_icon = ui.Button(self.parent, self.resources["play_icon.png"], (0, 0,), self.toggle_pause)
+        self.main_menu_icon = ui.Button(self.parent, self.resources["main_menu_icon.png"], (0, 0,), self.load_main_menu)
+        self.mute_icon = ui.Button(self.parent, self.resources["mute_icon.png"], (0, 0,), self.toggle_music)
+        self.paused_buttons = [self.resume_icon, self.main_menu_icon, self.mute_icon]
+        self.buttons.extend(self.paused_buttons)
+        button_count = len(self.paused_buttons)
+        button_width = 60
+        button_margin = 10
+        centerx = self.screen_size[0]/2
+        centery = self.screen_size[1]/2
+        x = centerx - (button_count*(button_width+button_margin)-button_margin)/2
+        for button in self.paused_buttons:
+            button.rect.centery = centery
+            button.rect.left = x
+            x += button_width + button_margin
+
+
 
     # called once per tick by main.py
     def update(self):
@@ -80,6 +108,7 @@ class Game:
             self.check_bounds()
             self.enemies.update(self.cur_time, self.offsetx, self.player.get_centerx())
             self.check_collision()
+            self.tick_count += 1
 
         # blits everything on parent surface
         self.draw()
@@ -92,21 +121,26 @@ class Game:
 
             if not self.game_over:
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    # CHECK CLICK FOR ATTACK
-                    if event.button == 1:
-                        self.player.begin_attack()
+                    if self.paused:
+                        for button in self.paused_buttons:
+                            button.check_click(event.pos)
+                    else:
+                        # CHECK CLICK FOR ATTACK
+                        if event.button == 1:
+                            self.player.begin_attack()
 
                 elif event.type == pg.KEYDOWN:
-                    # PLAYER MOVEMENT
-                    if event.key == pg.K_d:
-                        self.player.move_direction += 1
-                    elif event.key == pg.K_a:
-                        self.player.move_direction -= 1
-                    elif event.key == pg.K_w:
-                        self.player.jump()
                     # PAUSE HANDLING
-                    elif event.key == pg.K_ESCAPE:
+                    if event.key == pg.K_ESCAPE:
                         self.toggle_pause()
+                    elif not self.paused:
+                        # PLAYER MOVEMENT
+                        if event.key == pg.K_d:
+                            self.player.move_direction += 1
+                        elif event.key == pg.K_a:
+                            self.player.move_direction -= 1
+                        elif event.key == pg.K_w:
+                            self.player.jump()
 
 
                 elif event.type == pg.KEYUP:
@@ -119,7 +153,7 @@ class Game:
                 # check for click on buttons
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        for button in self.buttons:
+                        for button in self.game_over_buttons:
                             button.check_click(event.pos)
 
 
@@ -137,31 +171,47 @@ class Game:
         self.all_sprites.draw(
             self.parent)  # use pygame built-in draw function for sprite groups
 
-        # draw score text
-        self.draw_score(self.score)
-
         # drawing ui when game is over
         if self.game_over:
+            # draw different graphic depending on whether player won or lost
             if not self.win:
                 self.parent.blit(self.resources["game_over.png"], self.game_over_rect)
             else:
                 self.parent.blit(self.resources["level_complete.png"], self.level_complete_rect)
 
+            self.parent.blit(self.enemies_defeated_text, self.enemies_defeated_rect)
+            self.parent.blit(self.time_text, self.time_rect)
             self.parent.blit(self.high_score_text, self.high_score_rect)
             self.play_again_button.draw()
             self.main_menu_button.draw()
+        
+        # PAUSE UI
+        elif self.paused:
+            self.parent.blit(self.screen_dimmer, (0, 0))
+            for button in self.paused_buttons:
+                button.draw()
 
     # ends the game upon being called
     def end_game(self, win=False):
         self.win = win
         pg.mixer.music.stop()
 
+        # calculate score
+        time = int(self.tick_count/30)
+        score = self.enemies_defeated
+
         # update high score if score is higher than high score
-        if self.score > self.high_score:
-            self.high_score = self.score
+        if score > self.high_score:
+            self.high_score = score
 
         # positioning images for post-game ui
         centerx = self.screen_size[0]/2  # for positioning
+        self.enemies_defeated_text = self.font2.render("Enemies Defeated: " + str(self.enemies_defeated), True, "black", "white")
+        self.enemies_defeated_rect = self.enemies_defeated_text.get_rect()
+        self.enemies_defeated_rect.centerx = centerx
+        self.time_text = self.font2.render("Time: " + str(time) + " seconds", True, "black", "white")
+        self.time_rect = self.time_text.get_rect()
+        self.time_rect.centerx = centerx
         self.high_score_text = self.font2.render("High Score: " + str(self.high_score), True, "black", "white")
         self.high_score_rect = self.high_score_text.get_rect()
         self.high_score_rect.centerx = centerx
@@ -169,12 +219,14 @@ class Game:
             self.game_over_rect = self.resources["game_over.png"].get_rect()
             self.game_over_rect.centerx = centerx
             self.game_over_rect.top = 50
-            self.high_score_rect.top = self.game_over_rect.bottom + 10
+            self.enemies_defeated_rect.top = self.game_over_rect.bottom + 10
         else:
             self.level_complete_rect = self.resources["level_complete.png"].get_rect()
             self.level_complete_rect.centerx = centerx
             self.level_complete_rect.top = 50
-            self.high_score_rect.top = self.level_complete_rect.bottom + 10
+            self.enemies_defeated_rect.top = self.level_complete_rect.bottom + 10
+        self.time_rect.top = self.enemies_defeated_rect.bottom
+        self.high_score_rect.top = self.time_rect.bottom
 
         self.game_over = True
 
@@ -210,7 +262,7 @@ class Game:
 
     # handles death of an enemy
     def handle_enemy_death(self):
-        self.score += 1  # +1 score per enemy killed
+        self.enemies_defeated += 1  # +1 score per enemy killed
 
     # handles scrolling of camera when player moves
     def scroll(self):
@@ -251,8 +303,18 @@ class Game:
     def toggle_pause(self):
         if self.paused == False:
             self.paused = True
-            pg.mixer.music.pause()
+            if self.music_on:
+                pg.mixer.music.pause()
         else:
             self.paused = False
-            pg.mixer.music.unpause()
+            if self.music_on:
+                pg.mixer.music.unpause()
+    
+
+    def toggle_music(self):
+        if self.music_on == True:
+            self.music_on = False
+        else:
+            self.music_on = True
+
 

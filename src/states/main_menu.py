@@ -22,14 +22,20 @@ class Main_Menu:
     # position start button
     self.start_button = ui.Button(self.parent, self.resources["start_button.png"], (0, 0), self.load_map_selector)
     self.start_button.rect.centerx = self.screen_size[0]/2
-    self.start_button.rect.top = 80
+    self.start_button.rect.top = 70
     self.buttons.append(self.start_button)
 
     # position change difficulty button
-    self.difficulty_button = ui.Button(self.parent, self.resources["difficulty_button.png"], (0, 0), self.load_map_creator)
+    self.difficulty_button = ui.Button(self.parent, self.resources["difficulty_button.png"], (0, 0), self.load_difficulty_change)
     self.difficulty_button.rect.centerx = self.screen_size[0]/2
     self.difficulty_button.rect.top = self.start_button.rect.bottom + 30
     self.buttons.append(self.difficulty_button)
+
+    # create map creator button
+    self.map_creator_button = ui.Button(self.parent, self.resources["map_creator_button.png"], (0, 0), self.load_map_creator)
+    self.map_creator_button.rect.centerx = self.screen_size[0]/2
+    self.map_creator_button.rect.top = self.difficulty_button.rect.bottom + 15
+    self.buttons.append(self.map_creator_button)
 
     # reminder to turn on sound text
     sound_reminder_content = "Turn on sound for the best experience!"

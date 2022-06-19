@@ -16,6 +16,10 @@ class MapSelector:
         self.back_button = ui.Button(self.parent, resources["back_button.png"], (10, 10), self.load_main_menu)
         self.buttons.append(self.back_button)
 
+        # TITLE POSITIONING
+        self.title_rect = self.resources["map_select_title.png"].get_rect(centerx=screen_size[0]/2, top=20)
+        self.scroll_rect = self.resources["scroll_text.png"].get_rect(centerx=screen_size[0]/2, top=self.title_rect.bottom+5)
+
         map_row_size = (screen_size[0]-20, 50)
         map_row_marginy = 10
         font = pg.font.Font(None, int(map_row_size[1]/2))
@@ -52,9 +56,11 @@ class MapSelector:
 
     
     def draw(self):
-        self.parent.fill("black")
+        self.parent.fill("beige")
         for map_row in self.map_rows:
             map_row.draw(self.offsety)
+        self.parent.blit(self.resources["map_select_title.png"], self.title_rect)
+        self.parent.blit(self.resources["scroll_text.png"], self.scroll_rect)
         self.back_button.draw()
 
 
