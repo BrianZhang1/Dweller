@@ -25,53 +25,9 @@ class DataHandler:
             json.dump(data, json_file)
 
 
-    def create_default_data(self, bg_size, tile_size):
-        data = {
-            "maps": []
-        }
-        cols = int(bg_size[0]/tile_size) + 1
-        rows = int(bg_size[1]/tile_size) + 1
-
-        defaultmap = {
-            "name": "default",
-            "tilemap": [],
-            "width": 1
-        }
-        samplemap = {
-            "name": "sample",
-            "tilemap": [],
-            "width": 1
-        }
-
-        defaulttilemap = []
-        for i in range(cols):
-            col = []
-            for k in range(rows):
-                if k == rows-1:
-                    col.append(1)
-                else:
-                    col.append(0)
-            defaulttilemap.append(col)
-        defaultmap["tilemap"] = defaulttilemap
-        data["maps"].append(defaultmap)
-
-        sampletilemap = []
-        for i in range(cols):
-            col = []
-            for k in range(rows):
-                if k == rows-1:
-                    col.append(1)
-                elif i == 1 and k == rows-4:
-                    col.append(1)
-                elif (k == rows-4 or k == rows-3 or k == rows-2) and i in [6, 7, 8]:
-                    col.append(1)
-                elif k == rows-5 and i in [12, 13, 14, 15]:
-                    col.append(1)
-                else:
-                    col.append(0)
-            sampletilemap.append(col)
-        samplemap["tilemap"] = sampletilemap
-        data["maps"].append(samplemap)
+    def create_default_data(self):
+        with open("default_data.json") as default_data:
+            data = json.load(default_data)
 
         with open(DATA_PATH, "w") as json_file:
             json.dump(data, json_file)

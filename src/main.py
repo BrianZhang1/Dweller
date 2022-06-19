@@ -29,7 +29,7 @@ class Control:
     self.resources = resource_handler.load_resources()
     self.datah = data_handler.DataHandler()  # data handler (loading, writing, etc.)
     if self.datah.load_data() == 1:  # load_data() returns 1 upon FileNotFoundError
-      self.datah.create_default_data(bg_size=(self.resources["bg.png"].get_size()), tile_size=self.constants["TILE_SIZE"])
+      self.datah.create_default_data()
     
     # Variables
     self.state = None
