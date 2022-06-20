@@ -9,7 +9,7 @@ class Difficulty_Change:
     self.load_main_menu = load_main_menu
 
     self.screen_size = (parent.get_width(), parent.get_height())
-    self.buttons = []
+    self.buttons = []  # list containing all buttons in this state
 
     # assets for buttons
     self.easy_image = resources["easy.png"]
@@ -63,6 +63,7 @@ class Difficulty_Change:
 
       if event.type == pygame.MOUSEBUTTONDOWN:
         if event.button == 1:
+          # check clicks for each button
           self.back_button.check_click(event.pos)
           if self.easy_hitbox.collidepoint(event.pos):
             self.load_main_menu("easy")

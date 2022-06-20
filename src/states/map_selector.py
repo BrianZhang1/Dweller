@@ -8,6 +8,7 @@ class MapSelector:
         self.load_main_menu = load_main_menu
         self.load_game = load_game
 
+        # core variables
         screen_size = (self.parent.get_width(), self.parent.get_height())
         self.offsety = 0  # for up and down scrolling through map menu
         self.buttons = []
@@ -20,6 +21,7 @@ class MapSelector:
         self.title_rect = self.resources["map_select_title.png"].get_rect(centerx=screen_size[0]/2, top=20)
         self.scroll_rect = self.resources["scroll_text.png"].get_rect(centerx=screen_size[0]/2, top=self.title_rect.bottom+5)
 
+        # CREATE ROW FOR EACH MAP
         map_row_size = (screen_size[0]-20, 50)
         map_row_marginy = 10
         font = pg.font.Font(None, int(map_row_size[1]/2))
@@ -35,11 +37,13 @@ class MapSelector:
             i += 1
 
 
+    # called once per tick
     def update(self):
         self.handle_events()
         self.draw()
 
 
+    # event handling
     def handle_events(self):
         for e in pg.event.get():
             if e.type == pg.QUIT:
@@ -47,14 +51,17 @@ class MapSelector:
             
             if e.type == pg.MOUSEBUTTONDOWN:
                 if e.button == 1:
+                    # CHECK FOR CLICK ON BUTTONS
                     for button in self.buttons:
                         button.check_click(e.pos)
+                # SCROLL UP OR DOWN WITH MOUSE WHEEL
                 elif e.button == 4:
                     self.offsety += 20
                 elif e.button == 5:
                     self.offsety -= 20
 
     
+    # draw everything
     def draw(self):
         self.parent.fill("beige")
         for map_row in self.map_rows:
@@ -64,6 +71,7 @@ class MapSelector:
         self.back_button.draw()
 
 
+# Map Row is a single row in the map selection screen that contains map details and a select button
 class MapRow:
     def __init__(self, parent, resources, load_game, map, size, font):
         self.parent = parent
@@ -76,6 +84,7 @@ class MapRow:
         self.offsety = 0  # most recent offsety level
     
 
+    # draws everything
     def draw(self, offsety):
         self.update_offsety(offsety)
         pg.draw.rect(self.parent, "green", self.rect)
@@ -91,6 +100,7 @@ class MapRow:
         self.offsety = new_offsety
     
 
+    # positions components depending on self.rect
     def load_images(self):
         self.name_text = self.font.render(self.map["name"], True, "black")
         self.name_rect = self.name_text.get_rect()

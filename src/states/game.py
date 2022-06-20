@@ -17,23 +17,13 @@ class Game:
         self.cur_time = pg.time.get_ticks()
         self.screen_size = (parent.get_width(), parent.get_height())
         self.scroll_speed = 5  # speed the background scrolls
-        self.enemies_defeated = 0
+        self.enemies_defeated = 0  # how many enemies have been defeated
         self.game_over = False  # whether the game is over
         self.buttons = []  # list of all button objects for ui
-        self.paused = False
+        self.paused = False  # whether game is paused
         self.tick_count = 0 # used to track how long since the game has started
-        self.music_on = True
+        self.music_on = True  # whether music is on
 
-        # change enemy spawn cooldown depending on game difficulty
-        if self.difficulty == "easy":
-            self.enemy_cooldown = 1000  # supposed to be 5000
-        elif self.difficulty == "okay":
-            self.enemy_cooldown = 4500
-        elif self.difficulty == "hard":
-            self.enemy_cooldown = 4000
-        else:
-            print("invalid difficulty")
-        
         # create map object
         self.map = map.Map(self.parent, self.resources, tile_size, self.map_data)
 
@@ -109,6 +99,7 @@ class Game:
         self.cur_time = pg.time.get_ticks()
         self.handle_events()
 
+        # update player and enemy movements if the game is not paused and is still going
         if not self.game_over and not self.paused:
             self.player.update(self.cur_time, self.offsetx)
             self.check_bounds()
@@ -129,16 +120,17 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if self.paused:
+                            # CHECK CLICK ON PAUSED UI BUTTONS
                             for button in self.paused_buttons:
                                 button.check_click(event.pos)
                         else:
                             # CHECK CLICK ON SETTINGS
                             if not self.settings_icon.check_click(event.pos):
-                                # CHECK CLICK FOR ATTACK
+                                # CHECK CLICK FOR ATTACK IF BUTTON NOT CLICKED
                                 self.player.begin_attack()
 
                 elif event.type == pg.KEYDOWN:
-                    # PAUSE HANDLING
+                    # ESC KEY PAUSES GAME
                     if event.key == pg.K_ESCAPE:
                         self.toggle_pause()
                     elif not self.paused:
@@ -151,6 +143,7 @@ class Game:
                             self.player.jump()
 
 
+                # stop player movement on keyup
                 elif event.type == pg.KEYUP:
                     if event.key == pg.K_d:
                         self.player.move_direction -= 1
@@ -158,7 +151,7 @@ class Game:
                         self.player.move_direction += 1
 
             else:
-                # check for click on buttons
+                # check for click on game over ui buttons
                 if event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         for button in self.game_over_buttons:
@@ -169,16 +162,15 @@ class Game:
     def draw(self):
         self.scroll()  # update screen offset
 
-        self.map.draw(self.offsetx)
-        self.settings_icon.draw()
+        self.map.draw(self.offsetx)  # draw map (background + tiles)
+        self.settings_icon.draw() 
 
         # update Rect position of all sprites to prepare to draw
         for sprite in self.all_sprites.sprites():
             sprite.update_rect(self.offsetx)
             sprite.healthbar.render()  # render healthbar of all sprites
         # draw all sprites
-        self.all_sprites.draw(
-            self.parent)  # use pygame built-in draw function for sprite groups
+        self.all_sprites.draw(self.parent)  # use pygame built-in draw function for sprite groups
 
         # drawing ui when game is over
         if self.game_over:
@@ -188,9 +180,11 @@ class Game:
             else:
                 self.parent.blit(self.resources["level_complete.png"], self.level_complete_rect)
 
+            # stats for game
             self.parent.blit(self.enemies_defeated_text, self.enemies_defeated_rect)
             self.parent.blit(self.time_text, self.time_rect)
             self.parent.blit(self.high_score_text, self.high_score_rect)
+            # menu buttons
             self.play_again_button.draw()
             self.main_menu_button.draw()
         
@@ -309,6 +303,7 @@ class Game:
         self.parent.blit(score_text, score_text_pos)
     
 
+    # toggles whether game is paused
     def toggle_pause(self):
         if self.paused == False:
             self.paused = True
@@ -320,6 +315,7 @@ class Game:
                 pg.mixer.music.unpause()
     
 
+    # toggles music on/off
     def toggle_music(self):
         if self.music_on == True:
             self.music_on = False

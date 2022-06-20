@@ -9,6 +9,7 @@ PATH_TO_RESOURCES = "resources"
 # each exception is a directory
 # each file in the directory are instead loaded into their own lists in the resources dictionary
 # the key is the directory path and the value is the name of the list that will hold the directory's assets
+# there is probably a better way to do this but I'm too lazy to implement it
 exceptions = {
   "resources/images/golem/Idle": "golem_idle",
   "resources/images/golem/Hurt": "golem_hurt",
@@ -36,7 +37,6 @@ exceptions = new_exceptions
 def load_resources():
   resources = {}
 
-  path_len = len(PATH_TO_RESOURCES) + 1
   # use os.walk to search through all directories in assets/ directory
   for root, dirs, files in os.walk(PATH_TO_RESOURCES):
     # split path into parts

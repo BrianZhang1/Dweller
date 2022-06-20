@@ -1,6 +1,11 @@
 # About
-Dweller is a work-in-progress PyGame rpg. This was made for a school project.  
-Planned future features include: an actual game.
+Dweller is a work-in-progress PyGame level-based rpg. This was made for a school project.  
+Planned future features include:  
+* Player Level-Up/Stat Point System
+* Various Enemy Types/Bosses
+* Auto-Generated Endless Mode
+* Different Classes/Weapons
+* Enemies Drop Items/Equipment upon Death
 
 # Project Structure
 /resources: All resources (image files, audio files, etc.)  

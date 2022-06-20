@@ -13,12 +13,15 @@ class Main_Menu:
 
     self.screen_size = (parent.get_width(), parent.get_height())
     
+    # images for buttons
     self.start_button_image = self.resources["start_button.png"]
     self.difficulty_button_image = self.resources["difficulty_button.png"]
 
+    # set font
     self.font = pygame.font.SysFont("Arial", 18)
     
-    self.buttons = []
+    self.buttons = []  # contains all buttons
+
     # position start button
     self.start_button = ui.Button(self.parent, self.resources["start_button.png"], (0, 0), self.load_map_selector)
     self.start_button.rect.centerx = self.screen_size[0]/2
@@ -59,6 +62,7 @@ class Main_Menu:
       if event.type == pygame.QUIT:
         pygame.quit()
         
+      # handle clicks on buttons
       if event.type == pygame.MOUSEBUTTONDOWN:
         if event.button == 1:
           for button in self.buttons:
@@ -71,4 +75,5 @@ class Main_Menu:
     self.parent.fill("burlywood1")
     for button in self.buttons:
       button.draw()
+    self.parent.blit(self.sound_reminder_text, self.sound_reminder_pos)
     

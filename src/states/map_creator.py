@@ -18,6 +18,7 @@ class Map_Creator:
         self.placing_tiles = False  # so user can click and drag to place multiple tiles
         self.portal = None  # location of the portal (ends level when player reaches this)
 
+        # -------------------POSITIONING UI ELEMENTS--------------------------------
         # NAVIGATION BUTTONS -----------------------------------
         # buttons at side of screen to move screen
         self.nav_buttons = []
@@ -109,7 +110,7 @@ class Map_Creator:
 
 
     
-
+    # called onced per tick
     def update(self):
         self.handle_events()
         self.check_place_tile()  # place a tile at mouse pos if self.placing_tiles is true
@@ -117,6 +118,7 @@ class Map_Creator:
         self.draw()
 
 
+    # handles events
     def handle_events(self):
         for e in pg.event.get():
             if e.type == pg.QUIT:
@@ -124,6 +126,7 @@ class Map_Creator:
             
             elif e.type == pg.MOUSEBUTTONDOWN:
                 if e.button == 1:
+                    # check clicks on buttons
                     button_pressed = False
                     for button in self.buttons:
                         if button.check_click(e.pos):
@@ -134,11 +137,13 @@ class Map_Creator:
                     if not button_pressed:
                         self.placing_tiles = True
             
+            # stop placing tiles when click released
             elif e.type == pg.MOUSEBUTTONUP:
                 self.placing_tiles = False
             
             elif e.type == pg.KEYDOWN:
                 if self.show_tb:
+                    # TYPING IN TEXTBOX
                     if e.key == pg.K_BACKSPACE:
                         self.title_tb.content = self.title_tb.content[:-1] # remove last character
                     elif e.key == pg.K_ESCAPE:
@@ -148,6 +153,7 @@ class Map_Creator:
                     else:
                         self.title_tb.content += e.unicode
                 else:
+                    # MOVE SCREEN WITH A AND D KEYS
                     if e.key == pg.K_a:
                         self.move_screen(-100)
                     elif e.key == pg.K_d:
@@ -155,6 +161,7 @@ class Map_Creator:
 
     
 
+    # draws everything
     def draw(self):
         self.parent.fill("black")
         self.map.draw(self.offsetx)
@@ -172,7 +179,7 @@ class Map_Creator:
         for button in self.nav_buttons:
             button.draw()
 
-        # show optional menus
+        # show menus
         if self.show_tb:
             self.title_tb.draw()
             self.parent.blit(self.resources["enter_to_save_text.png"], self.enter_to_save_rect)
@@ -181,13 +188,16 @@ class Map_Creator:
             self.width_incrementer.draw()
         
     
+    # moves screen horizontally by amount argument
     def move_screen(self, amount):
         self.offsetx += amount
 
 
+    # changes the selected tile type
     def set_selected_tile_type(self, new_tile):
         self.selected_tile_type = new_tile
     
+
     # title textbox for titling map
     def toggle_tb(self):
         if self.show_tb:
@@ -198,6 +208,7 @@ class Map_Creator:
             self.save_button.image = self.resources["close_save.png"]
     
 
+    # toggles settings panel open/close
     def toggle_settings(self):
         if self.show_settings:
             self.show_settings = False

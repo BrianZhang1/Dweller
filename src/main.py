@@ -1,4 +1,4 @@
-# MAIN FILE
+# MAIN FILE CONTROLLING HIGHER LEVEL FUNCTIONS
 # Controls switching between game states and higher level functions (high score, difficulty, loading assets, etc.)
 
 import pygame
@@ -43,7 +43,8 @@ class Control:
     self.root = pygame.display.set_mode(self.constants["SCREEN_SIZE"])
     self.clock = pygame.time.Clock()
 
-    self.load_main_menu() # initally start on main menu
+    # initally start on main menu
+    self.load_main_menu() 
     
     # starts game loop
     self.main()
@@ -77,6 +78,7 @@ class Control:
 
   # loads game screen
   def load_game(self, map, score=None):
+    # update highscore if applicable
     if score:
       if score > self.high_score:
         self.high_score = score
@@ -91,11 +93,13 @@ class Control:
     self.state_object = difficulty_change.Difficulty_Change(self.root, self.resources, self.load_main_menu, self.difficulty)
   
 
+  # loads map creator
   def load_map_creator(self):
     self.state = "map_creator"
     self.state_object = map_creator.Map_Creator(self.root, self.resources, self.datah.data, self.constants["TILE_SIZE"], self.datah.save_map, self.load_main_menu)
 
 
+  # loads map selector
   def load_map_selector(self):
     self.state = "map_selector"
     self.state_object = map_selector.MapSelector(self.root, self.resources, self.datah.data["maps"], self.load_main_menu, self.load_game)
