@@ -70,7 +70,10 @@ class Map:
     # radius is how many tiles the search should be
     def get_nearby_tiles(self, pos, radius=2):
         nearby_tiles = []
-        tile_index = self.get_tile(pos).list_pos
+        tile = self.get_tile(pos)
+        if tile == None:
+            return None
+        tile_index = tile.list_pos
         # next, search around the tile
         t = (tile_index[0]-radius+1, tile_index[1]-radius+1) # top left tile in search radius
         for i in range(2*radius-1):

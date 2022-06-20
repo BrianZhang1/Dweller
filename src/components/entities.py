@@ -93,6 +93,8 @@ class Entity(pg.sprite.Sprite):
 
     # check collision with nearby tiles
     tiles = self.get_nearby_tiles(self.get_center(), 3)
+    if tiles == None:
+      return
     tile_size = 32
     for tile in tiles:
       if tile.type == 1:
@@ -125,6 +127,8 @@ class Entity(pg.sprite.Sprite):
 
     # check collision with nearby tiles
     tiles = self.get_nearby_tiles(self.get_center(), 3)
+    if tiles == None:
+      return
     tile_size = 32
     for tile in tiles:
       if tile.type == 1:
