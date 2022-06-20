@@ -20,6 +20,7 @@ class Map:
         topleft = [0, 0]
         pos = topleft.copy()
 
+        # transform json tilemap into 2d list with tile objects
         new_tilemap = []
         for i in range(len(tilemap)):
             col = []
@@ -47,6 +48,7 @@ class Map:
                 tile.draw(self.parent, offsetx)
 
 
+    # draws the background
     def draw_background(self, offsetx):
         for i in range(self.width):
             posx = i * self.bg_img.get_width() - offsetx

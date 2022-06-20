@@ -53,7 +53,7 @@ class Entity(pg.sprite.Sprite):
     # attack variables
     self.active_attack = False # whether attack hitbox should be active
 
-    # auxiliary objects
+    # Healthbar
     self.healthbar = Healthbar(self.parent, self)
 
     # initially start on idle state
@@ -69,17 +69,20 @@ class Entity(pg.sprite.Sprite):
     self.update_pos(offsetx)
     self.handle_gravity()
 
+    # animate if animation cooldown passed
     if self.cur_time - self.last_animation > self.animation_cooldown and not self.animation_paused:
       self.animate()
 
 
   # updates position depending on velocity values
   # also checks for collision with tiles
+  # updates y then x movement separately in one tick
   def update_pos(self, offsetx):
     self.update_posy(offsetx)
     self.update_posx(offsetx)
 
 
+  # updates y position depending on vel_y and checks tile collision
   def update_posy(self, offsetx):
     newy = self.pos[1] - self.vel_y
     new_bottomleft = (self.pos[0], newy)
@@ -88,8 +91,9 @@ class Entity(pg.sprite.Sprite):
     grounded = False
     ychanged = False
 
+    # check collision with nearby tiles
     tiles = self.get_nearby_tiles(self.get_center(), 3)
-    tile_size = 32  # CHANGE TO VARIABLE
+    tile_size = 32
     for tile in tiles:
       if tile.type == 1:
         tile_rect = pg.Rect((tile.pos[0] - offsetx, tile.pos[1]), (tile_size, tile_size))
@@ -110,6 +114,7 @@ class Entity(pg.sprite.Sprite):
       self.pos[1] = newy
 
 
+  # updates x position depending on vel_x and checks tile collision
   def update_posx(self, offsetx):
     newx = self.pos[0] + self.vel_x
     new_bottomleft = (newx, self.pos[1])
@@ -117,8 +122,10 @@ class Entity(pg.sprite.Sprite):
     nrect = self.get_rect(offsetx, new_bottomleft)  # rect of new position of player
     x_changed = False
 
+
+    # check collision with nearby tiles
     tiles = self.get_nearby_tiles(self.get_center(), 3)
-    tile_size = 32  # CHANGE TO VARIABLE
+    tile_size = 32
     for tile in tiles:
       if tile.type == 1:
         tile_rect = pg.Rect((tile.pos[0] - offsetx, tile.pos[1]), (tile_size, tile_size))
@@ -140,7 +147,7 @@ class Entity(pg.sprite.Sprite):
   
 
   # returns the rect of this entity
-  # usually overridden by subclasses
+  # sometimes overridden by subclasses
   def get_rect(self):
     return self.rect
   
@@ -196,6 +203,7 @@ class Entity(pg.sprite.Sprite):
       if self.state == "run":
         self.change_state("idle")
     
+    # changes direction if new direction
     self.try_change_direction(self.move_direction)
         
 
@@ -223,11 +231,14 @@ class Entity(pg.sprite.Sprite):
     self.animation_step += 1
     
 
+  # begins jump
   def jump(self):
     self.grounded = False
     self.vel_y = 14
     self.change_state("jump")
 
+
+  # begins attack
   def begin_attack(self):
     self.change_state("attack")
     self.vel_x = 0
@@ -326,11 +337,13 @@ class Entity(pg.sprite.Sprite):
         self.change_state("hurt")
 
 
+  # pauses animation
   def pause_animation(self):
     self.animation_paused = True
     self.pause_time = self.cur_time
 
 
+  # unpauses animation
   def unpause_animation(self):
     self.animation_paused = False
     self.pause_time = None
@@ -369,7 +382,6 @@ class Healthbar:
 
     self.size = (80, 4)
     self.font = pg.font.Font(None, 20)
-    
 
   # draw healthbar+text
   def render(self):
@@ -377,7 +389,7 @@ class Healthbar:
     self.render_text()
 
 
-  # render the bar
+  # render the bar depending on position of entity this healthbar is attached to
   def render_bar(self):
     y_margin = 4
     self.pos = pg.Rect((0, 0), self.size)
@@ -416,6 +428,7 @@ class Healthbar:
 
 
 
+# Class for the user-controlled player
 class Player(Entity):
   def __init__(self, parent, resources, end_game, get_nearby_tiles):
 
@@ -434,11 +447,15 @@ class Player(Entity):
       "fall": (resources["woodcutter_fall"], resources["woodcutter_fall_reverse"], 1)
     }
 
+    # important variables
     init_pos = (100, 367)
+
+    # managing attack
     active_attack_frames = [3, 4]
     self.attack_recovery = 1200 # time it takes to recover after finishing attack
     self.last_attack = 0  # time of last attack
 
+    # managing jump
     self.jump_count = 0
     self.jump_ability = 1  # how many jumps the player can make in the air
     self.jump_power = 12 # how high the player can jump in 1 jump
@@ -463,6 +480,7 @@ class Player(Entity):
     }
 
 
+  # called once per tick
   def update(self, cur_time, offsetx):
     super().update(cur_time, offsetx)
     if self.grounded:
@@ -565,6 +583,7 @@ class Player(Entity):
       self.pos[0] = posx - 62
 
 
+  # sets left of this player
   def set_left(self, left):
     if self.direction:
       self.pos[0] = left-14
@@ -579,6 +598,7 @@ class Player(Entity):
   
 
 
+# Class for enemies
 class Enemy(Entity):
   def __init__(self, parent, resources, init_pos, death_callback, difficulty, get_nearby_tiles):
 
@@ -595,9 +615,11 @@ class Enemy(Entity):
     }
     self.animation_ref["fall"] = self.animation_ref["idle"]
 
+    # attack variables
     active_attack_frames = [7, 8, 9] # which frames in attack animation is the attack hitbox actually active
     self.attack_recovery = 800 # time it takes to recover after finishing attack
-    # health changes depending on difficulty
+
+    # health/speed changes depending on difficulty
     if difficulty == "easy":
       health = 2
       speed = 2
@@ -614,8 +636,8 @@ class Enemy(Entity):
     self.hurt_sound = resources["enemy_hurt.mp3"]
     self.death_sound = resources["enemy_hurt.mp3"]
 
-    self.active = False # whether enemy is active or not
     # enemies become active after they see the player
+    self.active = False # whether enemy is active or not
 
 
   # called once per tick
@@ -663,7 +685,7 @@ class Enemy(Entity):
     return rect
   
 
-
+  # methods that get/set positioning
   def get_center(self):
     return (self.pos[0]+54, self.pos[1]-34)
   

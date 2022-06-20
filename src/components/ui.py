@@ -13,6 +13,7 @@ class Button:
         self.offset = (0, 0)  # screen offset
     
 
+    # draw the button
     def draw(self, offset=(0, 0)):
         self.update_offset(offset)
         self.parent.blit(self.image, self.rect)
@@ -64,6 +65,8 @@ class Textbox:
         self.error_duration = None
     
 
+    # called once per tick
+    # turns off error message after error_duration has passed
     def update(self):
         if self.error != None:
             cur_time = pg.time.get_ticks()
@@ -71,6 +74,7 @@ class Textbox:
                 self.end_error()
 
 
+    # draw the textbox
     def draw(self):
         pg.draw.rect(self.parent, self.tb_bg_color, self.rect)
         pg.draw.rect(self.parent, self.entry_color, self.entry_rect)
@@ -78,6 +82,7 @@ class Textbox:
         self.draw_entry_text()
     
 
+    # draw the entrybox and content
     def draw_entry_text(self):
         if self.error == None:
             text = self.content_font.render(self.content, True, "black")
@@ -88,6 +93,7 @@ class Textbox:
         self.parent.blit(text, text_rect)
 
 
+    # update position of tb components
     def update_tb_pos(self):
         if self.title != None:
             self.title_rect = self.title_text.get_rect(centerx=self.rect.centerx, top=self.rect.top+self.margin)
@@ -97,12 +103,14 @@ class Textbox:
             self.entry_rect.center = self.rect.center
     
 
+    # sets an error in the textbox
     def set_error(self, error, duration):
         self.error = error
         self.error_start_time = pg.time.get_ticks()
         self.error_duration = duration
     
 
+    # ends textbox error
     def end_error(self):
         self.error = None
         self.error_start_time = None
@@ -118,11 +126,13 @@ class Incrementer:
         self.title = title
         self.callback = callback
         
+        # font and positioning
         self.title_font = pg.font.SysFont("Arial", 15)
         self.value_font = pg.font.SysFont("Arial", 12)
         self.margin = 5  # pixel margin separating the components of this widget
         self.value = init_value  # value of this widget
 
+        # creating buttons
         self.title_text = self.title_font.render(str(title), True, "black")
         self.increase_width_button = Button(self.parent, self.resources["arrow_up.png"], (0, 0), lambda: self.callback(1))
         self.value_text = self.value_font.render(str(self.value), True, "black")
@@ -150,12 +160,14 @@ class Incrementer:
         self.decrease_width_button.rect.top = self.value_rect.bottom + 5
     
 
+    # sets the value for the incrementer
     def set_value(self, new_value):
         self.value = new_value
         self.value_text = self.value_font.render(str(self.value), True, "black")
         self.position_components()
 
     
+    # draws the incrementer
     def draw(self):
         pg.draw.rect(self.parent, "lightblue", self.rect)
         self.parent.blit(self.title_text, self.title_rect)
