@@ -73,6 +73,12 @@ class Game:
         self.buttons.extend(self.game_over_buttons)
 
         # PAUSE UI
+        # Pause/Settings button
+        self.settings_icon = ui.Button(self.parent, self.resources["settings_icon.png"], (0, 0), self.toggle_pause)
+        self.settings_icon.rect.top = 10
+        self.settings_icon.rect.right = self.screen_size[0]-10
+        self.buttons.append(self.settings_icon)
+
         # dim screen
         self.screen_dimmer = pg.Surface(self.screen_size)
         self.screen_dimmer.set_alpha(128)
@@ -121,13 +127,15 @@ class Game:
 
             if not self.game_over:
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    if self.paused:
-                        for button in self.paused_buttons:
-                            button.check_click(event.pos)
-                    else:
-                        # CHECK CLICK FOR ATTACK
-                        if event.button == 1:
-                            self.player.begin_attack()
+                    if event.button == 1:
+                        if self.paused:
+                            for button in self.paused_buttons:
+                                button.check_click(event.pos)
+                        else:
+                            # CHECK CLICK ON SETTINGS
+                            if not self.settings_icon.check_click(event.pos):
+                                # CHECK CLICK FOR ATTACK
+                                self.player.begin_attack()
 
                 elif event.type == pg.KEYDOWN:
                     # PAUSE HANDLING
@@ -162,6 +170,7 @@ class Game:
         self.scroll()  # update screen offset
 
         self.map.draw(self.offsetx)
+        self.settings_icon.draw()
 
         # update Rect position of all sprites to prepare to draw
         for sprite in self.all_sprites.sprites():
