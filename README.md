@@ -7,6 +7,14 @@ Planned future features include:
 * Different Classes/Weapons
 * Enemies Drop Items/Equipment upon Death
 
+# How to play
+
+1. Clone repository.
+2. Install dependencies: `pip install -r requirements.txt` (create a venv if needed)
+3. Run the dweller.py file: `python dweller.py`  
+
+Enjoy!
+
 # Project Structure
 /resources: All resources (image files, audio files, etc.)  
 /src: All source code.  
