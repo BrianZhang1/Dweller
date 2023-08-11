@@ -48,7 +48,6 @@ def load_resources():
         sprite_dict = {}
         sprite_dict_reverse = {} # horizontally flipped version of sprites
         for file in files:
-          print(file)
           image = pygame.image.load(os.path.join(root, file))
           image_reverse = pygame.transform.flip(image, True, False)
           sprite_dict[file] = image
@@ -57,7 +56,6 @@ def load_resources():
         sorted_sprite_list.sort()
         sorted_sprite_reverse_list = list(sprite_dict_reverse.keys())
         sorted_sprite_reverse_list.sort()
-        print(sorted_sprite_list)
         resources[exceptions[root]] = [sprite_dict[key] for key in sorted_sprite_list]
         resources[exceptions[root]+"_reverse"] = [sprite_dict_reverse[key] for key in sorted_sprite_reverse_list]
       # if not exception, load directly into dict
