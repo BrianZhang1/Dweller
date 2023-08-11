@@ -45,15 +45,21 @@ def load_resources():
     if "images" in bits:
       # account for exceptions
       if root in exceptions.keys():
-        sprite_list = []
-        sprite_list_reverse = [] # horizontally flipped version of sprites
+        sprite_dict = {}
+        sprite_dict_reverse = {} # horizontally flipped version of sprites
         for file in files:
+          print(file)
           image = pygame.image.load(os.path.join(root, file))
           image_reverse = pygame.transform.flip(image, True, False)
-          sprite_list.append(image)
-          sprite_list_reverse.append(image_reverse)
-        resources[exceptions[root]] = sprite_list
-        resources[exceptions[root]+"_reverse"] = sprite_list_reverse
+          sprite_dict[file] = image
+          sprite_dict_reverse[file] = image_reverse
+        sorted_sprite_list = list(sprite_dict.keys())
+        sorted_sprite_list.sort()
+        sorted_sprite_reverse_list = list(sprite_dict_reverse.keys())
+        sorted_sprite_reverse_list.sort()
+        print(sorted_sprite_list)
+        resources[exceptions[root]] = [sprite_dict[key] for key in sorted_sprite_list]
+        resources[exceptions[root]+"_reverse"] = [sprite_dict_reverse[key] for key in sorted_sprite_reverse_list]
       # if not exception, load directly into dict
       else:
         for file in files:
