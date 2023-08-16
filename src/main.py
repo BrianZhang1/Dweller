@@ -23,6 +23,7 @@ def start():
 # This class controls the entire program.
 class Control:
   def __init__(self, constants):
+    pygame.display.set_caption("Dweller")
     self.constants = constants
     
     # Load resources and data
