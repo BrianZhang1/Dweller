@@ -1,3 +1,5 @@
+import pygame_widgets
+from pygame_widgets.slider import Slider
 import pygame as pg
 from ..components import entities, ui, map
 
@@ -90,6 +92,9 @@ class Game:
             button.rect.centery = centery
             button.rect.left = x
             x += button_width + button_margin
+        # Slider for pause screen
+        slider_height = 15
+        self.slider = Slider(self.parent, int(x), int(centery-slider_height/2), 80, slider_height, min=0, max=99, step=1, initial=99)
 
 
 
@@ -97,7 +102,7 @@ class Game:
     def update(self):
         # the update function is called once per tick
         self.cur_time = pg.time.get_ticks()
-        self.handle_events()
+        events = self.handle_events()
 
         # update player and enemy movements if the game is not paused and is still going
         if not self.game_over and not self.paused:
@@ -108,11 +113,13 @@ class Game:
             self.tick_count += 1
 
         # blits everything on parent surface
-        self.draw()
+        self.draw(events)
+
 
     # handles events
     def handle_events(self):
-        for event in pg.event.get():
+        events = pg.event.get()
+        for event in events:
             if event.type == pg.QUIT:
                 pg.quit()
 
@@ -157,9 +164,12 @@ class Game:
                         for button in self.game_over_buttons:
                             button.check_click(event.pos)
 
+        # return events so that pygame_widgets can update its widgets after draw
+        return events
+
 
     # draws everything in the game
-    def draw(self):
+    def draw(self, events):
         self.scroll()  # update screen offset
 
         self.map.draw(self.offsetx)  # draw map (background + tiles)
@@ -193,6 +203,9 @@ class Game:
             self.parent.blit(self.screen_dimmer, (0, 0))
             for button in self.paused_buttons:
                 button.draw()
+            # update widgets specific to pygame_widgets module (ex. volume slider if settings is open)
+            pg.mixer.music.set_volume(self.slider.getValue()/100)
+            pygame_widgets.update(events)
 
     # ends the game upon being called
     def end_game(self, win=False):
